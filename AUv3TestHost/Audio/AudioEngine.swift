@@ -32,12 +32,12 @@ public class AudioEngine {
     public init() {
         setupEngine()
         #if os(iOS)
-        setupiOSAudioSession()
+        setupIOSAudioSession()
         #endif
     }
     
     #if os(iOS)
-    private func setupiOSAudioSession() {
+    private func setupIOSAudioSession() {
         let audioSession = AVAudioSession.sharedInstance()
         
         do {
@@ -93,7 +93,7 @@ public class AudioEngine {
         
         #if os(iOS)
         // Ensure audio session is active before loading plugin
-        ensureiOSAudioSessionActive()
+        ensureIOSAudioSessionActive()
         #endif
         
         // 2. 实例化 AudioUnit
@@ -160,7 +160,7 @@ public class AudioEngine {
     }
     
     #if os(iOS)
-    private func ensureiOSAudioSessionActive() {
+    private func ensureIOSAudioSessionActive() {
         let audioSession = AVAudioSession.sharedInstance()
         
         do {
@@ -220,7 +220,7 @@ public class AudioEngine {
         do {
             #if os(iOS)
             // Ensure audio session is active before starting playback
-            ensureiOSAudioSessionActive()
+            ensureIOSAudioSessionActive()
             #endif
             
             if !engine.isRunning {
