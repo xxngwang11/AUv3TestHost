@@ -13,6 +13,7 @@ A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Uni
 - 📊 **Benchmark Mode**: Run multiple load tests and calculate average performance
 - 🔄 **Load Options**: Compare Out-of-Process vs In-Process loading
 - 📈 **History Tracking**: View historical load performance data
+- 🎵 **iOS Support**: Full iOS compatibility with proper audio session management
 
 ## Requirements
 
@@ -20,13 +21,32 @@ A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Uni
 - Xcode 15.0+
 - Swift 5.9+
 
+## Building
+
+### For macOS
+Build using Xcode or xcodebuild on macOS.
+
+### For iOS
+iOS apps require Xcode for building. See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) for detailed iOS build and testing instructions.
+
+**Note**: This project cannot be built on Linux as it requires Apple platform frameworks (SwiftUI, AVFoundation, CoreAudioKit).
+
+## iOS-Specific Features
+
+- ✅ Automatic AVAudioSession configuration
+- ✅ Microphone permission handling
+- ✅ Background audio support
+- ✅ Audio interruption handling (phone calls, etc.)
+- ✅ Audio route change monitoring (headphones, Bluetooth)
+- ✅ Enhanced error handling for iOS audio issues
+
 ## Usage
 
 1. Select a plugin type from the segmented control
 2. Choose a plugin from the list
 3. Toggle "Out-of-Process" option as needed
-4. Click "Load" to load the plugin and measure performance
-5. Click "Benchmark x5" to run multiple load tests
+4. Click/Tap "Load" to load the plugin and measure performance
+5. Click/Tap "Benchmark x5" to run multiple load tests
 
 ## Performance Guidelines
 

@@ -10,6 +10,9 @@ let package = Package(
         .iOS(.v17)
     ],
     products: [
+        // Note: For iOS app development, use Xcode projects instead of SPM executables
+        // SPM executable targets are primarily for macOS CLI tools
+        // This package structure supports both macOS and iOS via Xcode
         .executable(
             name: "AUv3TestHost",
             targets: ["AUv3TestHost"]
@@ -19,7 +22,8 @@ let package = Package(
         .executableTarget(
             name: "AUv3TestHost",
             dependencies: [],
-            path: "AUv3TestHost"
+            path: "AUv3TestHost",
+            exclude: ["Info.plist"]
         ),
     ]
 )
