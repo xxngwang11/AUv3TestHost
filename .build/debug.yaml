@@ -1,0 +1,73 @@
+client:
+  name: basic
+  file-system: device-agnostic
+tools: {}
+targets:
+  "AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe": ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe>"]
+  "AUv3TestHost-x86_64-unknown-linux-gnu-debug.module": ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.module>"]
+  "PackageStructure": ["<PackageStructure>"]
+  "main": ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe>","<AUv3TestHost-x86_64-unknown-linux-gnu-debug.module>"]
+  "test": ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe>","<AUv3TestHost-x86_64-unknown-linux-gnu-debug.module>"]
+default: "main"
+nodes:
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/":
+    is-directory-structure: true
+    content-exclusion-patterns: [".git",".build"]
+commands:
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHost.swiftmodule.o":
+    tool: shell
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules/AUv3TestHost.swiftmodule"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHost.swiftmodule.o"]
+    description: "Wrapping AST for AUv3TestHost for debugging"
+    args: ["/usr/share/swift/usr/bin/swiftc","-modulewrap","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules/AUv3TestHost.swiftmodule","-o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHost.swiftmodule.o","-target","x86_64-unknown-linux-gnu"]
+
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/sources":
+    tool: write-auxiliary-file
+    inputs: ["<sources-file-list>","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/AUv3TestHostApp.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Audio/AudioEngine.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/ContentView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Models/AudioUnitLoader.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Models/LoadMetrics.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/AUViewControllerRepresentable.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/MetricBar.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/MetricsHistoryView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/PluginDetailView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/PluginRow.swift"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/sources"]
+    description: "Write auxiliary file /home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/sources"
+
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.product/Objects.LinkFileList":
+    tool: write-auxiliary-file
+    inputs: ["<link-file-list>","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHost.swiftmodule.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHostApp.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioEngine.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioUnitLoader.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/ContentView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/LoadMetrics.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricsHistoryView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginDetailView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.swift.o"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.product/Objects.LinkFileList"]
+    description: "Write auxiliary file /home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.product/Objects.LinkFileList"
+
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/swift-version--1BFCD5C06E9F820A.txt":
+    tool: write-auxiliary-file
+    inputs: ["<swift-get-version>","/usr/share/swift/usr/bin/swiftc"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/swift-version--1BFCD5C06E9F820A.txt"]
+    always-out-of-date: "true"
+    description: "Write auxiliary file /home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/swift-version--1BFCD5C06E9F820A.txt"
+
+  "<AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe>":
+    tool: phony
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost"]
+    outputs: ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe>"]
+
+  "<AUv3TestHost-x86_64-unknown-linux-gnu-debug.module>":
+    tool: phony
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHostApp.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioEngine.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/ContentView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioUnitLoader.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/LoadMetrics.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricsHistoryView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginDetailView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules/AUv3TestHost.swiftmodule"]
+    outputs: ["<AUv3TestHost-x86_64-unknown-linux-gnu-debug.module>"]
+
+  "C.AUv3TestHost-x86_64-unknown-linux-gnu-debug.exe":
+    tool: shell
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHost.swiftmodule.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHostApp.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioEngine.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioUnitLoader.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/ContentView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/LoadMetrics.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricsHistoryView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginDetailView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.product/Objects.LinkFileList"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost"]
+    description: "Linking ./.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost"
+    args: ["/usr/share/swift/usr/bin/swiftc","-L","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug","-o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost","-module-name","AUv3TestHost","-emit-executable","-Xlinker","--defsym","-Xlinker","main=AUv3TestHost_main","-Xlinker","-rpath=$ORIGIN","@/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.product/Objects.LinkFileList","-target","x86_64-unknown-linux-gnu","-g"]
+
+  "C.AUv3TestHost-x86_64-unknown-linux-gnu-debug.module":
+    tool: shell
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/AUv3TestHostApp.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Audio/AudioEngine.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/ContentView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Models/AudioUnitLoader.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Models/LoadMetrics.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/AUViewControllerRepresentable.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/MetricBar.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/MetricsHistoryView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/PluginDetailView.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/PluginRow.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/swift-version--1BFCD5C06E9F820A.txt","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/sources"]
+    outputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUv3TestHostApp.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioEngine.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/ContentView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AudioUnitLoader.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/LoadMetrics.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricsHistoryView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginDetailView.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.swift.o","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules/AUv3TestHost.swiftmodule"]
+    description: "Compiling Swift Module 'AUv3TestHost' (10 sources)"
+    args: ["/usr/share/swift/usr/bin/swiftc","-module-name","AUv3TestHost","-emit-dependencies","-emit-module","-emit-module-path","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules/AUv3TestHost.swiftmodule","-output-file-map","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/output-file-map.json","-incremental","-c","@/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/sources","-I","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/Modules","-target","x86_64-unknown-linux-gnu","-incremental","-enable-batch-mode","-serialize-diagnostics","-index-store-path","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/index/store","-Onone","-enable-testing","-j4","-DSWIFT_PACKAGE","-DDEBUG","-DSWIFT_MODULE_RESOURCE_BUNDLE_UNAVAILABLE","-module-cache-path","/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/ModuleCache","-parseable-output","-Xfrontend","-entry-point-function-name","-Xfrontend","AUv3TestHost_main","-swift-version","5","-g","-Xcc","-fPIC","-Xcc","-g","-package-name","auv3testhost","-Xcc","-fno-omit-frame-pointer"]
+
+  "PackageStructure":
+    tool: package-structure-tool
+    inputs: ["/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/","/home/runner/work/AUv3TestHost/AUv3TestHost/Package.swift","/home/runner/work/AUv3TestHost/AUv3TestHost/Package.resolved"]
+    outputs: ["<PackageStructure>"]
+    description: "Planning build"
+    allow-missing-inputs: true
+
