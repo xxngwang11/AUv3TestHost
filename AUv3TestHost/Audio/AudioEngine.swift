@@ -3,6 +3,10 @@ import AudioToolbox
 import CoreAudioKit
 import os
 
+#if os(iOS)
+import UIKit
+#endif
+
 /// 简单音频引擎
 @MainActor
 @Observable
@@ -27,7 +31,32 @@ public class AudioEngine {
     
     public init() {
         setupEngine()
+        #if os(iOS)
+        setupiOSAudioSession()
+        #endif
     }
+    
+    #if os(iOS)
+    private func setupiOSAudioSession() {
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        do {
+            // Ensure audio session is properly configured
+            try audioSession.setCategory(.playAndRecord, mode: .default, options: [.defaultToSpeaker, .allowBluetooth, .allowBluetoothA2DP])
+            try audioSession.setActive(true)
+            
+            log.info("iOS audio session configured in AudioEngine")
+            log.info("Preferred sample rate: \(audioSession.preferredSampleRate) Hz")
+            log.info("Preferred buffer duration: \(audioSession.preferredIOBufferDuration * 1000) ms")
+            
+            // Set preferred buffer duration for low latency
+            try audioSession.setPreferredIOBufferDuration(0.005) // 5ms for low latency
+            
+        } catch {
+            log.error("Failed to configure iOS audio session: \(error.localizedDescription)")
+        }
+    }
+    #endif
     
     private func setupEngine() {
         engine.attach(player)
@@ -61,6 +90,11 @@ public class AudioEngine {
         
         // 1. 卸载当前插件
         await unloadCurrentPlugin()
+        
+        #if os(iOS)
+        // Ensure audio session is active before loading plugin
+        ensureiOSAudioSessionActive()
+        #endif
         
         // 2. 实例化 AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
@@ -98,8 +132,22 @@ public class AudioEngine {
             let loadVCEnd = CFAbsoluteTimeGetCurrent()
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
-        } catch {
+        } catch let error as NSError {
+            #if os(iOS)
+            // iOS-specific error handling
+            if error.domain == NSOSStatusErrorDomain {
+                log.error("Audio Unit error (OSStatus \(error.code)): \(error.localizedDescription)")
+                if error.code == Int(kAudioUnitErr_InvalidProperty) {
+                    log.error("Invalid property - check audio session configuration")
+                } else if error.code == Int(kAudioUnitErr_FormatNotSupported) {
+                    log.error("Format not supported - check audio format compatibility")
+                }
+            } else {
+                log.error("Failed to load plugin: \(error.localizedDescription)")
+            }
+            #else
             log.error("Failed to load plugin: \(error.localizedDescription)")
+            #endif
         }
         
         let totalEnd = CFAbsoluteTimeGetCurrent()
@@ -110,6 +158,21 @@ public class AudioEngine {
         
         return metrics
     }
+    
+    #if os(iOS)
+    private func ensureiOSAudioSessionActive() {
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        if !audioSession.isOtherAudioPlaying {
+            do {
+                try audioSession.setActive(true)
+                log.info("iOS audio session activated for plugin loading")
+            } catch {
+                log.error("Failed to activate iOS audio session: \(error.localizedDescription)")
+            }
+        }
+    }
+    #endif
     
     private func connectPlugin(_ audioUnit: AVAudioUnit) {
         // 断开现有连接
@@ -157,6 +220,11 @@ public class AudioEngine {
         guard !isPlaying else { return }
         
         do {
+            #if os(iOS)
+            // Ensure audio session is active before starting playback
+            ensureiOSAudioSessionActive()
+            #endif
+            
             if !engine.isRunning {
                 try engine.start()
             }
@@ -171,13 +239,27 @@ public class AudioEngine {
             
             player.play()
             isPlaying = true
-        } catch {
+            
+            log.info("Audio playback started successfully")
+            
+        } catch let error as NSError {
+            #if os(iOS)
+            if error.domain == NSOSStatusErrorDomain {
+                log.error("Audio playback error (OSStatus \(error.code)): \(error.localizedDescription)")
+            } else if error.domain == AVAudioSessionErrorDomain {
+                log.error("Audio session error: \(error.localizedDescription)")
+            } else {
+                log.error("Failed to start playing: \(error.localizedDescription)")
+            }
+            #else
             log.error("Failed to start playing: \(error.localizedDescription)")
+            #endif
         }
     }
     
     public func stopPlaying() {
         player.stop()
         isPlaying = false
+        log.info("Audio playback stopped")
     }
 }
