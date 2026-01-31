@@ -1,4 +1,5 @@
 import SwiftUI
+import AVFoundation
 import os
 
 /// Diagnostic view to show system information and help debug iOS issues
