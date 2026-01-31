@@ -38,7 +38,7 @@ struct AUViewControllerRepresentable: UIViewControllerRepresentable {
     
     static func dismantleUIViewController(_ uiViewController: AUViewController, coordinator: ()) {
         // Clean up when view controller is removed
-        log.info("Dismantling AUViewController")
+        Self.log.info("Dismantling AUViewController")
     }
 }
 #endif
