@@ -7,7 +7,7 @@ import os
 import UIKit
 #endif
 
-/// 简单音频引擎
+/// Simple Audio Engine for AUv3 plugin hosting and performance measurement
 @MainActor
 @Observable
 public class AudioEngine {
@@ -18,15 +18,15 @@ public class AudioEngine {
     private let engine = AVAudioEngine()
     private let player = AVAudioPlayerNode()
     
-    // 当前加载的插件
+    // Currently loaded plugin
     public var currentAudioUnit: AVAudioUnit?
     public var currentViewController: AUViewController?
     
-    // 状态
+    // State
     public var isPlaying = false
     public var isLoading = false
     
-    // 测试音频文件
+    // Test audio file
     private var testFile: AVAudioFile?
     
     public init() {
@@ -49,8 +49,9 @@ public class AudioEngine {
             log.info("Preferred sample rate: \(audioSession.preferredSampleRate) Hz")
             log.info("Preferred buffer duration: \(audioSession.preferredIOBufferDuration * 1000) ms")
             
-            // Set preferred buffer duration for low latency
-            try audioSession.setPreferredIOBufferDuration(0.005) // 5ms for low latency
+            // Set preferred buffer duration for low latency (5 milliseconds = 0.005 seconds)
+            let lowLatencyBufferDuration: TimeInterval = 0.005
+            try audioSession.setPreferredIOBufferDuration(lowLatencyBufferDuration)
             
         } catch {
             log.error("Failed to configure iOS audio session: \(error.localizedDescription)")
@@ -63,15 +64,15 @@ public class AudioEngine {
         engine.connect(player, to: engine.mainMixerNode, format: nil)
         engine.prepare()
         
-        // 加载测试音频（可选）
+        // Load test audio (optional)
         if let url = Bundle.main.url(forResource: "TestAudio", withExtension: "wav") {
             testFile = try? AVAudioFile(forReading: url)
         }
     }
     
-    // MARK: - 加载插件
+    // MARK: - Plugin Loading
     
-    /// 加载 AUv3 插件并测量性能
+    /// Load AUv3 plugin and measure performance
     public func loadPlugin(
         component: AVAudioUnitComponent,
         outOfProcess: Bool = true
@@ -88,7 +89,7 @@ public class AudioEngine {
         
         let totalStart = CFAbsoluteTimeGetCurrent()
         
-        // 1. 卸载当前插件
+        // 1. Unload current plugin
         await unloadCurrentPlugin()
         
         #if os(iOS)
@@ -96,7 +97,7 @@ public class AudioEngine {
         ensureIOSAudioSessionActive()
         #endif
         
-        // 2. 实例化 AudioUnit
+        // 2. Instantiate AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : .loadInProcess
@@ -112,19 +113,19 @@ public class AudioEngine {
             
             self.currentAudioUnit = audioUnit
             
-            // 3. 连接音频图
+            // 3. Connect audio graph
             let connectStart = CFAbsoluteTimeGetCurrent()
             connectPlugin(audioUnit)
             let connectEnd = CFAbsoluteTimeGetCurrent()
             metrics.connectAudioGraphTime = (connectEnd - connectStart) * 1000
             
-            // 4. 分配渲染资源
+            // 4. Allocate render resources
             let allocateStart = CFAbsoluteTimeGetCurrent()
             try engine.start()
             let allocateEnd = CFAbsoluteTimeGetCurrent()
             metrics.allocateResourcesTime = (allocateEnd - allocateStart) * 1000
             
-            // 5. 加载 ViewController
+            // 5. Load ViewController
             let loadVCStart = CFAbsoluteTimeGetCurrent()
             if let vc = await audioUnit.auAudioUnit.requestViewController(completionHandler: { _ in }) {
                 self.currentViewController = vc as? AUViewController
@@ -153,7 +154,7 @@ public class AudioEngine {
         let totalEnd = CFAbsoluteTimeGetCurrent()
         metrics.totalTime = (totalEnd - totalStart) * 1000
         
-        // 记录指标
+        // Record metrics
         await MetricsManager.shared.record(metrics)
         
         return metrics
@@ -173,22 +174,22 @@ public class AudioEngine {
     #endif
     
     private func connectPlugin(_ audioUnit: AVAudioUnit) {
-        // 断开现有连接
+        // Disconnect existing connections
         engine.disconnectNodeInput(engine.mainMixerNode)
         
-        // 连接插件
+        // Connect plugin
         engine.attach(audioUnit)
         
         let hardwareFormat = engine.outputNode.outputFormat(forBus: 0)
         
         if audioUnit.auAudioUnit.componentDescription.componentType == kAudioUnitType_Effect ||
            audioUnit.auAudioUnit.componentDescription.componentType == kAudioUnitType_MusicEffect {
-            // 效果器: player -> effect -> mixer
+            // Effect: player -> effect -> mixer
             let format = testFile?.processingFormat ?? hardwareFormat
             engine.connect(player, to: audioUnit, format: format)
             engine.connect(audioUnit, to: engine.mainMixerNode, format: format)
         } else {
-            // 乐器/生成器: instrument -> mixer
+            // Instrument/Generator: instrument -> mixer
             let stereoFormat = AVAudioFormat(standardFormatWithSampleRate: hardwareFormat.sampleRate, channels: 2)
             engine.connect(audioUnit, to: engine.mainMixerNode, format: stereoFormat)
         }
@@ -208,11 +209,11 @@ public class AudioEngine {
         currentAudioUnit = nil
         currentViewController = nil
         
-        // 重新连接 player -> mixer
+        // Reconnect player -> mixer
         engine.connect(player, to: engine.mainMixerNode, format: nil)
     }
     
-    // MARK: - 播放控制
+    // MARK: - Playback Control
     
     public func startPlaying() {
         guard !isPlaying else { return }
