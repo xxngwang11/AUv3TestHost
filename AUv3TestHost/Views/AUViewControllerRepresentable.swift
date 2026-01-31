@@ -15,10 +15,10 @@ struct AUViewControllerRepresentable: NSViewControllerRepresentable {
 #else
 struct AUViewControllerRepresentable: UIViewControllerRepresentable {
     let viewController: AUViewController
-    private let log = Logger(subsystem: "com.test.AUv3TestHost", category: "AUViewControllerRepresentable")
+    private static let log = Logger(subsystem: "com.test.AUv3TestHost", category: "AUViewControllerRepresentable")
     
     func makeUIViewController(context: Context) -> AUViewController {
-        log.info("Creating AUViewController for iOS")
+        Self.log.info("Creating AUViewController for iOS")
         
         // Configure view controller for iOS presentation
         viewController.view.translatesAutoresizingMaskIntoConstraints = false
@@ -33,13 +33,12 @@ struct AUViewControllerRepresentable: UIViewControllerRepresentable {
     
     func updateUIViewController(_ uiViewController: AUViewController, context: Context) {
         // Handle any updates to the view controller
-        log.debug("Updating AUViewController")
+        Self.log.debug("Updating AUViewController")
     }
     
     static func dismantleUIViewController(_ uiViewController: AUViewController, coordinator: ()) {
         // Clean up when view controller is removed
-        Logger(subsystem: "com.test.AUv3TestHost", category: "AUViewControllerRepresentable")
-            .info("Dismantling AUViewController")
+        log.info("Dismantling AUViewController")
     }
 }
 #endif

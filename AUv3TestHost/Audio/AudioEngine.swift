@@ -163,13 +163,11 @@ public class AudioEngine {
     private func ensureiOSAudioSessionActive() {
         let audioSession = AVAudioSession.sharedInstance()
         
-        if !audioSession.isOtherAudioPlaying {
-            do {
-                try audioSession.setActive(true)
-                log.info("iOS audio session activated for plugin loading")
-            } catch {
-                log.error("Failed to activate iOS audio session: \(error.localizedDescription)")
-            }
+        do {
+            try audioSession.setActive(true)
+            log.info("iOS audio session activated for plugin loading")
+        } catch {
+            log.error("Failed to activate iOS audio session: \(error.localizedDescription)")
         }
     }
     #endif
