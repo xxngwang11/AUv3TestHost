@@ -80,42 +80,34 @@ public class PluginScanner {
             componentFlagsMask: 0
         )
         
-        do {
-            let manager = AVAudioUnitComponentManager.shared()
-            let foundPlugins = manager.components(matching: description)
+        let manager = AVAudioUnitComponentManager.shared()
+        let foundPlugins = manager.components(matching: description)
+        
+        log.info("Found \(foundPlugins.count) plugins of type \(typeToScan.rawValue)")
+        scanDiagnostics.append("Found: \(foundPlugins.count) plugins")
+        
+        if foundPlugins.isEmpty {
+            log.warning("No plugins found - this could be due to:")
+            log.warning("  1. No AUv3 plugins installed")
+            log.warning("  2. Sandbox restrictions (iOS)")
+            log.warning("  3. Audio session not properly configured")
+            scanDiagnostics.append("⚠️ No plugins found")
             
-            log.info("Found \(foundPlugins.count) plugins of type \(typeToScan.rawValue)")
-            scanDiagnostics.append("Found: \(foundPlugins.count) plugins")
-            
-            if foundPlugins.isEmpty {
-                log.warning("No plugins found - this could be due to:")
-                log.warning("  1. No AUv3 plugins installed")
-                log.warning("  2. Sandbox restrictions (iOS)")
-                log.warning("  3. Audio session not properly configured")
-                scanDiagnostics.append("⚠️ No plugins found")
-                
-                #if os(iOS)
-                lastScanError = "No AUv3 plugins found. On iOS, ensure:\n1. AUv3 plugins are installed\n2. Audio permissions are granted\n3. App has proper entitlements"
-                #else
-                lastScanError = "No AUv3 plugins found. Ensure AUv3 plugins are installed in the system."
-                #endif
-            } else {
-                // Log details about found plugins
-                for plugin in foundPlugins {
-                    log.debug("Plugin: \(plugin.name) by \(plugin.manufacturerName)")
-                    log.debug("  - Version: \(plugin.versionString ?? "unknown")")
-                    log.debug("  - Type: \(plugin.typeName)")
-                }
+            #if os(iOS)
+            lastScanError = "No AUv3 plugins found. On iOS, ensure:\n1. AUv3 plugins are installed\n2. Audio permissions are granted\n3. App has proper entitlements"
+            #else
+            lastScanError = "No AUv3 plugins found. Ensure AUv3 plugins are installed in the system."
+            #endif
+        } else {
+            // Log details about found plugins
+            for plugin in foundPlugins {
+                log.debug("Plugin: \(plugin.name) by \(plugin.manufacturerName)")
+                log.debug("  - Version: \(plugin.versionString ?? "unknown")")
+                log.debug("  - Type: \(plugin.typeName)")
             }
-            
-            plugins = foundPlugins.sorted { $0.name < $1.name }
-            
-        } catch {
-            log.error("Error scanning plugins: \(error.localizedDescription)")
-            lastScanError = "Error: \(error.localizedDescription)"
-            scanDiagnostics.append("❌ Error: \(error.localizedDescription)")
-            plugins = []
         }
+        
+        plugins = foundPlugins.sorted { $0.name < $1.name }
         
         isScanning = false
     }

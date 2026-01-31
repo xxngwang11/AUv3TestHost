@@ -204,8 +204,10 @@ AUv3TestHost/
 │       ├── PluginRow.swift          # Plugin list item
 │       ├── MetricBar.swift          # Performance visualization
 │       ├── MetricsHistoryView.swift # History view
+│       ├── DiagnosticsView.swift    # Diagnostics and troubleshooting
 │       └── AUViewControllerRepresentable.swift  # UI integration
-└── BUILD_INSTRUCTIONS.md            # This file
+├── BUILD_INSTRUCTIONS.md            # iOS build guide
+└── XCODE_PROJECT_SETUP.md           # Xcode project setup (this file)
 ```
 
 ## Additional Resources
