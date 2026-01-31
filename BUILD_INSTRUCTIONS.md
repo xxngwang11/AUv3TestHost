@@ -1,10 +1,30 @@
 # Building AUv3TestHost for iOS
 
+## ⚠️ Important Update
+
+This project now includes comprehensive Xcode project setup instructions. Please see [XCODE_PROJECT_SETUP.md](XCODE_PROJECT_SETUP.md) for:
+- Complete Xcode project creation guide
+- Required build settings and entitlements
+- Code signing configuration
+- Command-line build instructions
+- Troubleshooting tips
+
 ## Prerequisites
 - macOS 14.0 or later
 - Xcode 15.0 or later
 - An iOS device running iOS 17.0+ (for testing on real hardware)
 - Apple Developer account (for device deployment)
+
+## Recent Improvements
+
+The following improvements have been made for better iOS support:
+
+1. **Package.swift** - Changed from executable to library target for iOS compatibility
+2. **Adaptive UI** - iPhone and iPad optimized layouts (NavigationStack on iPhone, NavigationSplitView on iPad)
+3. **Enhanced Audio Session** - Complete interruption and route change handling
+4. **Better Error Handling** - Comprehensive diagnostics and error reporting
+5. **Entitlements** - Proper iOS entitlements for audio unit hosting
+6. **Diagnostics View** - Built-in troubleshooting tool accessible from the app
 
 ## Building for iOS
 
@@ -37,11 +57,12 @@ xcodebuild -scheme AUv3TestHost -destination 'platform=iOS,id=<DEVICE_UDID>' bui
 
 The following iOS-specific features have been implemented:
 
-### 1. Audio Session Configuration (`AUv3TestHostApp.swift`)
-- Automatic AVAudioSession setup on app launch
+### 1. Audio Session Configuration (`AUv3TestHostApp.swift` and `AudioEngine.swift`)
+- Automatic AVAudioSession setup on app launch and during plugin loading
 - Background audio support
-- Audio interruption handling (phone calls, etc.)
-- Audio route change monitoring (headphones, Bluetooth)
+- Audio interruption handling (phone calls, alarms, etc.) with automatic recovery
+- Audio route change monitoring (headphones, Bluetooth) with playback control
+- Enhanced error logging for iOS-specific audio issues
 
 ### 2. Permissions (`Info.plist`)
 - Microphone access permission with description
@@ -49,15 +70,34 @@ The following iOS-specific features have been implemented:
 - iPhone and iPad orientation support
 
 ### 3. Audio Engine Enhancements (`AudioEngine.swift`)
-- iOS-specific audio session initialization
-- Enhanced error handling for iOS audio issues
+- iOS-specific audio session initialization in both AppDelegate and AudioEngine
+- Enhanced error handling for iOS audio issues with detailed OSStatus codes
 - Low-latency buffer configuration
 - Platform-specific error logging
+- Interruption and route change observers for robust audio handling
 
 ### 4. ViewController Handling (`AUViewControllerRepresentable.swift`)
 - Proper iOS view controller presentation
 - Auto-layout configuration
 - Cleanup on dismissal
+
+### 5. Adaptive UI (`ContentView.swift`)
+- NavigationStack layout for iPhone (compact size class)
+- NavigationSplitView layout for iPad and macOS (regular size class)
+- Environment-based responsive design
+
+### 6. Enhanced Plugin Scanner (`AudioUnitLoader.swift`)
+- Comprehensive error handling and diagnostics
+- iOS-specific permission and sandbox checks
+- Detailed logging of scan results
+- Platform-aware error messages
+
+### 7. Diagnostics View
+- Real-time system information display
+- Audio session status monitoring
+- Plugin scanner diagnostics
+- Troubleshooting recommendations
+- Accessible via info button in toolbar
 
 ## Testing on iOS
 

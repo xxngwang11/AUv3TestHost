@@ -24,10 +24,16 @@ A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Uni
 ## Building
 
 ### For macOS
-Build using Xcode or xcodebuild on macOS.
+Build using Xcode by opening Package.swift, or use xcodebuild on macOS.
 
 ### For iOS
-iOS apps require Xcode for building. See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTIONS.md) for detailed iOS build and testing instructions.
+iOS apps require Xcode for building. See [XCODE_PROJECT_SETUP.md](XCODE_PROJECT_SETUP.md) for detailed iOS build and project setup instructions.
+
+**Important for iOS:**
+- The Package.swift uses a library target (not executable) for iOS compatibility
+- You must use Xcode to build and run iOS apps
+- Proper code signing and entitlements are required
+- See the setup guide for complete instructions
 
 **Note**: This project cannot be built on Linux as it requires Apple platform frameworks (SwiftUI, AVFoundation, CoreAudioKit).
 
@@ -39,6 +45,9 @@ iOS apps require Xcode for building. See [BUILD_INSTRUCTIONS.md](BUILD_INSTRUCTI
 - ✅ Audio interruption handling (phone calls, etc.)
 - ✅ Audio route change monitoring (headphones, Bluetooth)
 - ✅ Enhanced error handling for iOS audio issues
+- ✅ Adaptive UI for iPhone and iPad
+- ✅ Comprehensive diagnostics view for troubleshooting
+- ✅ Proper entitlements for audio unit hosting
 
 ## Usage
 

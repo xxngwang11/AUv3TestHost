@@ -53,8 +53,100 @@ public class AudioEngine {
             let lowLatencyBufferDuration: TimeInterval = 0.005
             try audioSession.setPreferredIOBufferDuration(lowLatencyBufferDuration)
             
+            // Add audio session interruption observer
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleAudioSessionInterruption(_:)),
+                name: AVAudioSession.interruptionNotification,
+                object: audioSession
+            )
+            
+            // Add audio route change observer
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(handleAudioRouteChange(_:)),
+                name: AVAudioSession.routeChangeNotification,
+                object: audioSession
+            )
+            
+            log.info("Audio session observers registered")
+            
         } catch {
             log.error("Failed to configure iOS audio session: \(error.localizedDescription)")
+        }
+    }
+    
+    @objc private func handleAudioSessionInterruption(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let typeValue = userInfo[AVAudioSessionInterruptionTypeKey] as? UInt,
+              let type = AVAudioSession.InterruptionType(rawValue: typeValue) else {
+            return
+        }
+        
+        switch type {
+        case .began:
+            log.info("AudioEngine: Audio session interrupted - stopping playback")
+            stopPlaying()
+            
+        case .ended:
+            log.info("AudioEngine: Audio session interruption ended")
+            // Check if we should resume
+            if let optionsValue = userInfo[AVAudioSessionInterruptionOptionKey] as? UInt {
+                let options = AVAudioSession.InterruptionOptions(rawValue: optionsValue)
+                if options.contains(.shouldResume) {
+                    log.info("AudioEngine: Resuming audio session")
+                    do {
+                        try AVAudioSession.sharedInstance().setActive(true)
+                        // Optionally restart engine if needed
+                        if currentAudioUnit != nil && !engine.isRunning {
+                            try engine.start()
+                        }
+                    } catch {
+                        log.error("AudioEngine: Failed to reactivate audio session: \(error.localizedDescription)")
+                    }
+                }
+            }
+            
+        @unknown default:
+            log.warning("AudioEngine: Unknown interruption type")
+        }
+    }
+    
+    @objc private func handleAudioRouteChange(_ notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVAudioSessionRouteChangeReasonKey] as? UInt,
+              let reason = AVAudioSession.RouteChangeReason(rawValue: reasonValue) else {
+            return
+        }
+        
+        switch reason {
+        case .newDeviceAvailable:
+            log.info("AudioEngine: New audio device available")
+            
+        case .oldDeviceUnavailable:
+            log.info("AudioEngine: Audio device removed - may need to stop playback")
+            // Optionally stop playback when headphones are unplugged
+            if isPlaying {
+                stopPlaying()
+            }
+            
+        case .categoryChange:
+            log.info("AudioEngine: Audio session category changed")
+            
+        case .override:
+            log.info("AudioEngine: Audio route override")
+            
+        case .wakeFromSleep:
+            log.info("AudioEngine: Audio route change - wake from sleep")
+            
+        case .noSuitableRouteForCategory:
+            log.warning("AudioEngine: No suitable route for audio category")
+            
+        case .routeConfigurationChange:
+            log.info("AudioEngine: Audio route configuration changed")
+            
+        @unknown default:
+            log.info("AudioEngine: Unknown audio route change reason")
         }
     }
     #endif
