@@ -192,7 +192,7 @@ public class AudioEngine {
         // 2. Instantiate AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
-        let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : .loadInProcess
+        let options: AudioComponentInstantiationOptions = .loadOutOfProcess
         
         do {
             let audioUnit = try await AVAudioUnit.instantiate(
@@ -219,9 +219,10 @@ public class AudioEngine {
             
             // 5. Load ViewController
             let loadVCStart = CFAbsoluteTimeGetCurrent()
-            if let vc = await audioUnit.auAudioUnit.requestViewController(completionHandler: { _ in }) {
-                self.currentViewController = vc as? AUViewController
-            }
+            let vc = await withCheckedContinuation { continuation in
+                    audioUnit.auAudioUnit.requestViewController { viewController in
+                        continuation.resume(returning: viewController as? AUViewController)
+                    }
             let loadVCEnd = CFAbsoluteTimeGetCurrent()
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
@@ -337,8 +338,6 @@ public class AudioEngine {
             #if os(iOS)
             if error.domain == NSOSStatusErrorDomain {
                 log.error("Audio playback error (OSStatus \(error.code)): \(error.localizedDescription)")
-            } else if error.domain == AVAudioSessionErrorDomain {
-                log.error("Audio session error: \(error.localizedDescription)")
             } else {
                 log.error("Failed to start playing: \(error.localizedDescription)")
             }
