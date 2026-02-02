@@ -1,8 +1,7 @@
 import SwiftUI
 
 struct MetricsHistoryView: View {
-    @Environment(\.
-    dismiss) private var dismiss
+    @Environment(\.dismiss) private var dismiss
     @State private var metricsManager = MetricsManager.shared
     
     var body: some View {
