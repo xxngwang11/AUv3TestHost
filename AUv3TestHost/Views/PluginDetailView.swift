@@ -51,10 +51,9 @@ struct PluginDetailView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
-                if let version = plugin.versionString {
-                    Text("Version: \(version)")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                Text("Version: \(plugin.versionString)")
+ 	                    .font(.caption)
+ 	                    .foregroundColor(.secondary)
                 }
             }
             
