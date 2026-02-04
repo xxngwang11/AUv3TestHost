@@ -11,9 +11,10 @@ A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Uni
   - Resource allocation
   - ViewController loading
 - 📊 **Benchmark Mode**: Run multiple load tests and calculate average performance
-- 🔄 **Load Options**: Compare Out-of-Process vs In-Process loading
+- 🔄 **Load Options**: Compare Out-of-Process vs In-Process loading (defaults to out-of-process)
 - 📈 **History Tracking**: View historical load performance data
 - 🎵 **iOS Support**: Full iOS compatibility with proper audio session management
+- 🎛️ **Test Plugin Included**: Simple Effect plugin for testing audio chain and UI integration
 
 ## Requirements
 
@@ -49,13 +50,35 @@ iOS apps require Xcode for building. See [XCODE_PROJECT_SETUP.md](XCODE_PROJECT_
 - ✅ Comprehensive diagnostics view for troubleshooting
 - ✅ Proper entitlements for audio unit hosting
 
+## Test Plugin
+
+The repository includes a simple AUv3 Effect plugin (TestEffectAUv3) for testing:
+- **Gain Control**: Adjust audio volume from 0.0 to 2.0
+- **Bypass Switch**: Enable/disable effect processing
+- **SwiftUI Interface**: Real-time parameter display
+- **Out-of-Process**: Tests plugin isolation and stability
+
+See [PLUGIN_TESTING.md](PLUGIN_TESTING.md) for setup and testing instructions.
+
 ## Usage
+
+### Host Application
 
 1. Select a plugin type from the segmented control
 2. Choose a plugin from the list
-3. Toggle "Out-of-Process" option as needed
+3. Out-of-Process option is enabled by default (recommended)
 4. Click/Tap "Load" to load the plugin and measure performance
 5. Click/Tap "Benchmark x5" to run multiple load tests
+
+### Test Plugin
+
+1. Build and run **TestPluginContainer** on your iOS device
+2. Build and run **AUv3TestHost** on the same device
+3. Tap "Refresh Plugins" and select "Effect" type
+4. Find "TestCompany: Test Effect" in the list
+5. Load the plugin and test the audio chain
+
+**Note**: The test plugin requires manual Xcode project configuration. See PLUGIN_TESTING.md for details.
 
 ## Performance Guidelines
 
