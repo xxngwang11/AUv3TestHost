@@ -44,6 +44,13 @@
     "swift-dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.swiftdeps",
     "diagnostics": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/AUViewControllerRepresentable.dia"
   },
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/DiagnosticsView.swift": {
+    "dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DiagnosticsView.d",
+    "object": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DiagnosticsView.swift.o",
+    "swiftmodule": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DiagnosticsView~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DiagnosticsView.swiftdeps",
+    "diagnostics": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DiagnosticsView.dia"
+  },
   "/home/runner/work/AUv3TestHost/AUv3TestHost/AUv3TestHost/Views/MetricBar.swift": {
     "dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.d",
     "object": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/MetricBar.swift.o",
@@ -71,5 +78,12 @@
     "swiftmodule": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow~partial.swiftmodule",
     "swift-dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.swiftdeps",
     "diagnostics": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/PluginRow.dia"
+  },
+  "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/DerivedSources/resource_bundle_accessor.swift": {
+    "dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/resource_bundle_accessor.d",
+    "object": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/resource_bundle_accessor.swift.o",
+    "swiftmodule": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/resource_bundle_accessor~partial.swiftmodule",
+    "swift-dependencies": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/resource_bundle_accessor.swiftdeps",
+    "diagnostics": "/home/runner/work/AUv3TestHost/AUv3TestHost/.build/x86_64-unknown-linux-gnu/debug/AUv3TestHost.build/resource_bundle_accessor.dia"
   }
 }
