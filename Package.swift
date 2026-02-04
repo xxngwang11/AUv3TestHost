@@ -22,7 +22,8 @@ let package = Package(
             name: "AUv3TestHost",
             dependencies: [],
             path: "AUv3TestHost",
-            exclude: ["Info.plist"]
+            exclude: ["Info.plist"],
+            resources: [.process("Resources")]
         ),
     ]
 )

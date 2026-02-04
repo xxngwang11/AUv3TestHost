@@ -158,28 +158,45 @@ struct PluginDetailView: View {
     // MARK: - 控制栏
     
     private var controlBar: some View {
-        HStack {
-            Button {
-                if engine.isPlaying {
-                    engine.stopPlaying()
-                } else {
-                    engine.startPlaying()
+        VStack(spacing: 8) {
+            // Info hint for effect plugins
+            if let audioUnit = engine.currentAudioUnit,
+               audioUnit.auAudioUnit.componentDescription.componentType == kAudioUnitType_Effect ||
+               audioUnit.auAudioUnit.componentDescription.componentType == kAudioUnitType_MusicEffect {
+                HStack {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(.blue)
+                    Text("Playing test audio through the effect chain")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-            } label: {
-                Image(systemName: engine.isPlaying ? "stop.fill" : "play.fill")
-                Text(engine.isPlaying ? "Stop" : "Play Test Audio")
+                .padding(.horizontal)
             }
-            .buttonStyle(.bordered)
             
-            Spacer()
-            
-            if loadCount > 0 {
-                Text("Loaded \(loadCount) time(s)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+            HStack {
+                Button {
+                    if engine.isPlaying {
+                        engine.stopPlaying()
+                    } else {
+                        engine.startPlaying()
+                    }
+                } label: {
+                    Image(systemName: engine.isPlaying ? "stop.fill" : "play.fill")
+                    Text(engine.isPlaying ? "Stop" : "Play Test Audio")
+                }
+                .buttonStyle(.bordered)
+                
+                Spacer()
+                
+                if loadCount > 0 {
+                    Text("Loaded \(loadCount) time(s)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
             }
+            .padding(.horizontal)
         }
-        .padding()
+        .padding(.vertical)
         .background(Color.secondary.opacity(0.1))
     }
     
