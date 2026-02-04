@@ -19,6 +19,7 @@
 		AA000100000000000000000A /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100100000000000000000A /* DiagnosticsView.swift */; };
 		AA000100000000000000000B /* AUViewControllerRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100100000000000000000B /* AUViewControllerRepresentable.swift */; };
 		AA000100000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA200100000000000000000C /* Assets.xcassets */; };
+		AA000100000000000000000D /* TestAudio.wav in Resources */ = {isa = PBXBuildFile; fileRef = AA200100000000000000000F /* TestAudio.wav */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		AA200100000000000000000C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		AA200100000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		AA200100000000000000000E /* AUv3TestHost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AUv3TestHost.entitlements; sourceTree = "<group>"; };
+		AA200100000000000000000F /* TestAudio.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = TestAudio.wav; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -66,6 +68,7 @@
 				AA5001000000000000000004 /* Audio */,
 				AA5001000000000000000005 /* Models */,
 				AA5001000000000000000006 /* Views */,
+				AA5001000000000000000007 /* Resources */,
 				AA200100000000000000000C /* Assets.xcassets */,
 				AA200100000000000000000D /* Info.plist */,
 				AA200100000000000000000E /* AUv3TestHost.entitlements */,
@@ -109,6 +112,14 @@
 				AA100100000000000000000B /* AUViewControllerRepresentable.swift */,
 			);
 			path = Views;
+			sourceTree = "<group>";
+		};
+		AA5001000000000000000007 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				AA200100000000000000000F /* TestAudio.wav */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,6 +181,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				AA000100000000000000000C /* Assets.xcassets in Resources */,
+				AA000100000000000000000D /* TestAudio.wav in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
