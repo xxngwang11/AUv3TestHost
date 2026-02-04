@@ -156,9 +156,71 @@ public class AudioEngine {
         engine.connect(player, to: engine.mainMixerNode, format: nil)
         engine.prepare()
         
-        // Load test audio (optional)
+        // Load test audio from Resources
         if let url = Bundle.main.url(forResource: "TestAudio", withExtension: "wav") {
-            testFile = try? AVAudioFile(forReading: url)
+            do {
+                testFile = try AVAudioFile(forReading: url)
+                log.info("Successfully loaded TestAudio.wav from bundle")
+                log.info("Audio format: \(testFile!.processingFormat.sampleRate) Hz, \(testFile!.processingFormat.channelCount) channels")
+            } catch {
+                log.error("Failed to load TestAudio.wav: \(error.localizedDescription)")
+                generateFallbackAudio()
+            }
+        } else {
+            log.warning("TestAudio.wav not found in bundle, generating fallback audio")
+            generateFallbackAudio()
+        }
+    }
+    
+    private func generateFallbackAudio() {
+        // Generate a simple sine wave as fallback
+        let sampleRate = 44100.0
+        let duration = 2.0 // 2 seconds
+        let frequency = 440.0 // A4 note
+        
+        let format = AVAudioFormat(standardFormatWithSampleRate: sampleRate, channels: 2)!
+        let frameCount = AVAudioFrameCount(sampleRate * duration)
+        
+        guard let buffer = AVAudioPCMBuffer(pcmFormat: format, frameCapacity: frameCount) else {
+            log.error("Failed to create audio buffer for fallback")
+            return
+        }
+        
+        buffer.frameLength = frameCount
+        
+        // Generate sine wave
+        let channelCount = Int(format.channelCount)
+        for channel in 0..<channelCount {
+            guard let channelData = buffer.floatChannelData?[channel] else { continue }
+            for frame in 0..<Int(frameCount) {
+                let time = Double(frame) / sampleRate
+                let sample = Float(sin(2.0 * .pi * frequency * time) * 0.3)
+                channelData[frame] = sample
+            }
+        }
+        
+        // Create temporary file for the buffer
+        let tempDir = FileManager.default.temporaryDirectory
+        let tempURL = tempDir.appendingPathComponent("FallbackAudio.wav")
+        
+        do {
+            let settings: [String: Any] = [
+                AVFormatIDKey: kAudioFormatLinearPCM,
+                AVSampleRateKey: sampleRate,
+                AVNumberOfChannelsKey: 2,
+                AVLinearPCMBitDepthKey: 16,
+                AVLinearPCMIsFloatKey: false,
+                AVLinearPCMIsBigEndianKey: false,
+                AVLinearPCMIsNonInterleaved: false
+            ]
+            
+            let file = try AVAudioFile(forWriting: tempURL, settings: settings)
+            try file.write(from: buffer)
+            
+            testFile = try AVAudioFile(forReading: tempURL)
+            log.info("Generated fallback sine wave audio (440 Hz, 2s)")
+        } catch {
+            log.error("Failed to generate fallback audio: \(error.localizedDescription)")
         }
     }
     
@@ -322,11 +384,10 @@ public class AudioEngine {
             }
             
             if let file = testFile {
-                player.scheduleFile(file, at: nil) { [weak self] in
-                    DispatchQueue.main.async {
-                        self?.isPlaying = false
-                    }
-                }
+                // Schedule the file to loop
+                scheduleAudioLoop(file: file)
+            } else {
+                log.warning("No test audio file available for playback")
             }
             
             player.play()
@@ -344,6 +405,20 @@ public class AudioEngine {
             #else
             log.error("Failed to start playing: \(error.localizedDescription)")
             #endif
+        }
+    }
+    
+    private func scheduleAudioLoop(file: AVAudioFile) {
+        // Schedule file and set up completion handler to loop
+        player.scheduleFile(file, at: nil) { [weak self] in
+            guard let self = self else { return }
+            
+            // If still playing, schedule the file again for looping
+            DispatchQueue.main.async {
+                if self.isPlaying {
+                    self.scheduleAudioLoop(file: file)
+                }
+            }
         }
     }
     
