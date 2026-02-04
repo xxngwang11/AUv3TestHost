@@ -211,7 +211,7 @@ public class AudioEngine {
                 AVLinearPCMBitDepthKey: 16,
                 AVLinearPCMIsFloatKey: false,
                 AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsNonInterleaved: false
+                AVLinearPCMIsNonInterleavedKey: false
             ]
             
             let file = try AVAudioFile(forWriting: tempURL, settings: settings)
@@ -411,20 +411,20 @@ public class AudioEngine {
     private func scheduleAudioLoop(file: AVAudioFile) {
         // Schedule file and set up completion handler to loop
         player.scheduleFile(file, at: nil) { [weak self] in
-            guard let self = self else { return }
+            guard let self = self, self.isPlaying else { return }
             
             // If still playing, schedule the file again for looping
-            DispatchQueue.main.async {
-                if self.isPlaying {
-                    self.scheduleAudioLoop(file: file)
-                }
+            // Check isPlaying again to handle race conditions
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self, self.isPlaying else { return }
+                self.scheduleAudioLoop(file: file)
             }
         }
     }
     
     public func stopPlaying() {
+        isPlaying = false  // Set flag first to stop any pending scheduling
         player.stop()
-        isPlaying = false
         log.info("Audio playback stopped")
     }
 }
