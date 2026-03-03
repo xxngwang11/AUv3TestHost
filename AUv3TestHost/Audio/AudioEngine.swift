@@ -231,7 +231,7 @@ public class AudioEngine {
     /// Load AUv3 plugin and measure performance
     public func loadPlugin(
         component: AVAudioUnitComponent,
-        outOfProcess: Bool = false
+        outOfProcess: Bool = true
     ) async -> PluginLoadMetrics {
         
         isLoading = true

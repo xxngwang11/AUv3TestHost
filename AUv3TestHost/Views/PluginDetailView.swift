@@ -5,7 +5,6 @@ import CoreAudioKit
 struct PluginDetailView: View {
     let plugin: AVAudioUnitComponent
     @Bindable var engine: AudioEngine
-    let loadOutOfProcess: Bool
     
     @State private var currentMetrics: PluginLoadMetrics?
     @State private var isLoading = false
@@ -258,7 +257,7 @@ struct PluginDetailView: View {
         
         let metrics = await engine.loadPlugin(
             component: plugin,
-            outOfProcess: loadOutOfProcess
+            outOfProcess: true
         )
         currentMetrics = metrics
         if engine.currentAudioUnit != nil {
@@ -276,7 +275,7 @@ struct PluginDetailView: View {
         for _ in 0..<times {
             let metrics = await engine.loadPlugin(
                 component: plugin,
-                outOfProcess: loadOutOfProcess
+                outOfProcess: true
             )
             if engine.currentAudioUnit != nil {
                 totalTime += metrics.totalTime
