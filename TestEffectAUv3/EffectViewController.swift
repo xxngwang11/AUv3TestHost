@@ -2,77 +2,77 @@ import CoreAudioKit
 import SwiftUI
 import AVFoundation
 
-/// View Controller for the Test Effect UI
-public class EffectViewController: AUViewController {
-    
-    private var audioUnit: TestEffectAudioUnit?
-    
-    public init(audioUnit: TestEffectAudioUnit) {
-        self.audioUnit = audioUnit
-        super.init(nibName: nil, bundle: nil)
+/// AUv3 视图控制器 + 工厂
+///
+/// 同时实现 AUAudioUnitFactory 协议：
+/// - 系统实例化此类作为扩展入口（NSExtensionPrincipalClass）
+/// - 系统调用 createAudioUnit(with:) 创建音频单元
+/// - 视图控制器自动持有音频单元引用，提供 UI
+public class EffectViewController: AUViewController, AUAudioUnitFactory {
+
+    var audioUnit: TestEffectAudioUnit?
+
+    // MARK: - AUAudioUnitFactory
+
+    public func createAudioUnit(with componentDescription: AudioComponentDescription) throws -> AUAudioUnit {
+        let au = try TestEffectAudioUnit(componentDescription: componentDescription, options: [])
+        audioUnit = au
+        return au
     }
-    
-    required init?(coder: NSCoder) {
-        super.init(coder: coder)
-    }
-    
+
+    // MARK: - View Lifecycle
+
     public override func viewDidLoad() {
         super.viewDidLoad()
-        
-        guard let audioUnit = audioUnit else { return }
-        
-        // Create SwiftUI view
-        let effectView = EffectView(audioUnit: audioUnit)
-        let hostingController = UIHostingController(rootView: effectView)
-        
-        // Add as child view controller
-        addChild(hostingController)
-        view.addSubview(hostingController.view)
-        hostingController.didMove(toParent: self)
-        
-        // Setup constraints
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+
+        let effectView = EffectView(getParameterTree: { [weak self] in
+            self?.audioUnit?.parameterTree
+        })
+
+        let hosting = UIHostingController(rootView: effectView)
+        addChild(hosting)
+        view.addSubview(hosting.view)
+        hosting.didMove(toParent: self)
+
+        hosting.view.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
-            hostingController.view.topAnchor.constraint(equalTo: view.topAnchor),
-            hostingController.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
-            hostingController.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            hostingController.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+            hosting.view.topAnchor.constraint(equalTo: view.topAnchor),
+            hosting.view.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+            hosting.view.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            hosting.view.trailingAnchor.constraint(equalTo: view.trailingAnchor)
         ])
-        
-        // Set preferred size
+
         preferredContentSize = CGSize(width: 300, height: 200)
     }
 }
 
-/// SwiftUI view for the effect parameters
+// MARK: - SwiftUI 界面
+
 struct EffectView: View {
-    let audioUnit: TestEffectAudioUnit
-    
+    let getParameterTree: () -> AUParameterTree?
+
     @State private var gain: Float = 1.0
     @State private var bypass: Bool = false
-    
-    // Timer for polling parameter changes from the audio unit
+
     let timer = Timer.publish(every: 0.1, on: .main, in: .common).autoconnect()
-    
+
     var body: some View {
         VStack(spacing: 20) {
             Text("测试效果器")
                 .font(.title2)
                 .fontWeight(.bold)
-            
+
             VStack(alignment: .leading, spacing: 16) {
-                // Bypass toggle
                 HStack {
                     Text("旁通")
                         .font(.headline)
                     Spacer()
                     Toggle("", isOn: $bypass)
-                        .onChange(of: bypass) { newValue in
-                            setBypass(newValue)
+                        .onChange(of: bypass) { _, newValue in
+                            setParam(address: 1, value: newValue ? 1.0 : 0.0)
                         }
                 }
-                
-                // Gain slider
+
                 VStack(alignment: .leading, spacing: 8) {
                     Text("增益")
                         .font(.headline)
@@ -81,8 +81,8 @@ struct EffectView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Slider(value: $gain, in: 0.0...2.0)
-                            .onChange(of: gain) { newValue in
-                                setGain(newValue)
+                            .onChange(of: gain) { _, newValue in
+                                setParam(address: 0, value: newValue)
                             }
                         Text("2.0")
                             .font(.caption)
@@ -92,8 +92,7 @@ struct EffectView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
-                
-                // Parameter display
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text("状态：")
                         .font(.caption)
@@ -106,49 +105,25 @@ struct EffectView: View {
             .padding()
         }
         .padding()
-        .onAppear {
-            loadParameters()
+        .onAppear { pollParameters() }
+        .onReceive(timer) { _ in pollParameters() }
+    }
+
+    private func pollParameters() {
+        guard let tree = getParameterTree() else { return }
+        if let p = tree.parameter(withAddress: 0) {
+            let v = p.value
+            if abs(v - gain) > 0.001 { gain = v }
         }
-        .onReceive(timer) { _ in
-            // Poll parameters from audio unit
-            if let parameterTree = audioUnit.parameterTree {
-                if let gainParam = parameterTree.parameter(withAddress: 0) {
-                    let currentGain = gainParam.value
-                    if abs(currentGain - gain) > 0.01 {
-                        gain = currentGain
-                    }
-                }
-                if let bypassParam = parameterTree.parameter(withAddress: 1) {
-                    let currentBypass = bypassParam.value >= 0.5
-                    if currentBypass != bypass {
-                        bypass = currentBypass
-                    }
-                }
-            }
+        if let p = tree.parameter(withAddress: 1) {
+            let v = p.value >= 0.5
+            if v != bypass { bypass = v }
         }
     }
-    
-    private func loadParameters() {
-        guard let parameterTree = audioUnit.parameterTree else { return }
-        
-        if let gainParam = parameterTree.parameter(withAddress: 0) {
-            gain = gainParam.value
-        }
-        
-        if let bypassParam = parameterTree.parameter(withAddress: 1) {
-            bypass = bypassParam.value >= 0.5
-        }
-    }
-    
-    private func setGain(_ value: Float) {
-        guard let parameterTree = audioUnit.parameterTree,
-              let gainParam = parameterTree.parameter(withAddress: 0) else { return }
-        gainParam.value = value
-    }
-    
-    private func setBypass(_ value: Bool) {
-        guard let parameterTree = audioUnit.parameterTree,
-              let bypassParam = parameterTree.parameter(withAddress: 1) else { return }
-        bypassParam.value = value ? 1.0 : 0.0
+
+    private func setParam(address: AUParameterAddress, value: AUValue) {
+        guard let tree = getParameterTree(),
+              let param = tree.parameter(withAddress: address) else { return }
+        param.value = value
     }
 }

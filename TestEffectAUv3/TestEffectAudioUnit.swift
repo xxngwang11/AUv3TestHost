@@ -1,190 +1,171 @@
 import AVFoundation
 import CoreAudioKit
+import UIKit
 import os
 
-/// Main Audio Unit class implementing the Test Effect
+/// AUv3 测试效果器 —— 简单的增益效果
+///
+/// 设计要点（解决 EXC_BAD_ACCESS 崩溃）：
+/// 1. 使用 lazy var 延迟初始化 bus 数组，避免 super.init() 期间隐式解包 nil
+/// 2. 使用堆上的 UnsafeMutablePointer<Float> 存储参数值，渲染块仅访问裸指针
+/// 3. internalRenderBlock 中不捕获任何 Swift/ObjC 对象，100% 实时安全
 public class TestEffectAudioUnit: AUAudioUnit {
-    
+
     private let log = Logger(subsystem: "com.test.TestEffectAUv3", category: "AudioUnit")
-    
-    // Audio format
-    private var inputBus: AUAudioUnitBus
-    private var outputBus: AUAudioUnitBus
-    private var inputBusArray: AUAudioUnitBusArray!
-    private var outputBusArray: AUAudioUnitBusArray!
-    
-    // Parameters
-    private var gainParameter: AUParameter!
-    private var bypassParameter: AUParameter!
-    
-    // DSP state
-    private var gain: Float = 1.0
-    private var bypass: Bool = false
-    
+
+    // MARK: - 音频总线
+
+    private var _inputBus: AUAudioUnitBus
+    private var _outputBus: AUAudioUnitBus
+
+    // lazy var：即使 super.init() 内部访问 inputBusses/outputBusses，也能安全初始化
+    private lazy var _inputBusArray: AUAudioUnitBusArray = {
+        AUAudioUnitBusArray(audioUnit: self, busType: .input, busses: [_inputBus])
+    }()
+    private lazy var _outputBusArray: AUAudioUnitBusArray = {
+        AUAudioUnitBusArray(audioUnit: self, busType: .output, busses: [_outputBus])
+    }()
+
+    // MARK: - 实时安全的参数存储（堆上裸指针，读写不涉及 ARC / ObjC 消息发送）
+
+    private let _gainPtr: UnsafeMutablePointer<Float>
+    private let _bypassPtr: UnsafeMutablePointer<Float>
+
+    // MARK: - 初始化
+
     public override init(componentDescription: AudioComponentDescription,
                          options: AudioComponentInstantiationOptions = []) throws {
-        
-        // Create default format
-        let defaultFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
-        
-        // Create input/output busses
-        let inputBus = try AUAudioUnitBus(format: defaultFormat)
-        let outputBus = try AUAudioUnitBus(format: defaultFormat)
-        
-        self.inputBus = inputBus
-        self.outputBus = outputBus
-        
+
+        // 1. 堆上分配参数存储
+        _gainPtr = .allocate(capacity: 1)
+        _gainPtr.initialize(to: 1.0)
+        _bypassPtr = .allocate(capacity: 1)
+        _bypassPtr.initialize(to: 0.0)
+
+        // 2. 创建总线（在 super.init 之前完成所有 stored property 初始化）
+        let format = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
+        _inputBus = try AUAudioUnitBus(format: format)
+        _outputBus = try AUAudioUnitBus(format: format)
+
+        // 3. super.init —— 此时若系统查询 inputBusses/outputBusses，lazy var 会安全创建
         try super.init(componentDescription: componentDescription, options: options)
-        
-        inputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .input, busses: [inputBus])
-        outputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .output, busses: [outputBus])
-        
-        // Setup parameters
+
+        // 4. 构建参数树
         setupParameterTree()
-        
-        log.info("TestEffectAudioUnit initialized")
+
+        log.info("TestEffectAudioUnit 初始化完成")
     }
-    
+
+    deinit {
+        _gainPtr.deinitialize(count: 1)
+        _gainPtr.deallocate()
+        _bypassPtr.deinitialize(count: 1)
+        _bypassPtr.deallocate()
+    }
+
+    // MARK: - 参数树
+
     private func setupParameterTree() {
-        // Create Gain parameter (0.0 to 2.0, default 1.0)
-        gainParameter = AUParameterTree.createParameter(
-            withIdentifier: "gain",
-            name: "Gain",
+        let gain = AUParameterTree.createParameter(
+            withIdentifier: "gain", name: "Gain",
             address: 0,
-            min: 0.0,
-            max: 2.0,
-            unit: .linearGain,
-            unitName: nil,
+            min: 0.0, max: 2.0,
+            unit: .linearGain, unitName: nil,
             flags: [.flag_IsReadable, .flag_IsWritable],
-            valueStrings: nil,
-            dependentParameters: nil
+            valueStrings: nil, dependentParameters: nil
         )
-        gainParameter.value = 1.0
-        
-        // Create Bypass parameter (0 = off, 1 = on)
-        bypassParameter = AUParameterTree.createParameter(
-            withIdentifier: "bypass",
-            name: "Bypass",
+        gain.value = 1.0
+
+        let bypass = AUParameterTree.createParameter(
+            withIdentifier: "bypass", name: "Bypass",
             address: 1,
-            min: 0,
-            max: 1,
-            unit: .boolean,
-            unitName: nil,
+            min: 0, max: 1,
+            unit: .boolean, unitName: nil,
             flags: [.flag_IsReadable, .flag_IsWritable],
-            valueStrings: nil,
-            dependentParameters: nil
+            valueStrings: nil, dependentParameters: nil
         )
-        bypassParameter.value = 0
-        
-        // Create parameter tree
-        parameterTree = AUParameterTree.createTree(withChildren: [gainParameter, bypassParameter])
-        
-        // Set up parameter observers
-        parameterTree?.implementorValueObserver = { [weak self] parameter, value in
-            guard let self = self else { return }
-            
-            switch parameter.address {
-            case 0: // Gain
-                self.gain = value
-                self.log.debug("Gain parameter changed: \(value)")
-            case 1: // Bypass
-                self.bypass = value >= 0.5
-                self.log.debug("Bypass parameter changed: \(self.bypass)")
-            default:
-                break
+        bypass.value = 0
+
+        parameterTree = AUParameterTree.createTree(withChildren: [gain, bypass])
+
+        // 观察者通过裸指针更新值 —— 不捕获 self
+        let gPtr = _gainPtr
+        let bPtr = _bypassPtr
+
+        parameterTree?.implementorValueObserver = { param, value in
+            switch param.address {
+            case 0: gPtr.pointee = value
+            case 1: bPtr.pointee = value
+            default: break
             }
-        }
-        
-        parameterTree?.implementorValueProvider = { [weak self] parameter in
-            guard let self = self else { return 0 }
-            
-            switch parameter.address {
-            case 0: // Gain
-                return self.gain
-            case 1: // Bypass
-                return self.bypass ? 1.0 : 0.0
-            default:
-                return 0
-            }
-        }
-    }
-    
-    // MARK: - AUAudioUnit Overrides
-    
-    public override var inputBusses: AUAudioUnitBusArray {
-        return inputBusArray
-    }
-    
-    public override var outputBusses: AUAudioUnitBusArray {
-        return outputBusArray
-    }
-    
-    public override func allocateRenderResources() throws {
-        try super.allocateRenderResources()
-        log.info("Render resources allocated")
-    }
-    
-    public override func deallocateRenderResources() {
-        super.deallocateRenderResources()
-        log.info("Render resources deallocated")
-    }
-    
-    public override var internalRenderBlock: AUInternalRenderBlock {
-        // Capture AUParameter references instead of self.
-        // AUParameter.value is designed to be safely read from the real-time
-        // audio thread, whereas [weak self] involves ARC operations that are
-        // NOT real-time safe and cause EXC_BAD_ACCESS on the render thread.
-        guard let gainParam = self.gainParameter,
-              let bypassParam = self.bypassParameter else {
-            return { _, _, _, _, _, _, _ in return kAudioUnitErr_Uninitialized }
         }
 
-        return { (
-            actionFlags,
-            timestamp,
-            frameCount,
-            outputBusNumber,
-            outputData,
-            realtimeEventListHead,
-            pullInputBlock
-        ) in
-            // Pull input
-            var pullFlags = AudioUnitRenderActionFlags(rawValue: 0)
-            let status = pullInputBlock?(&pullFlags, timestamp, frameCount, 0, outputData)
-            
-            if status != noErr {
-                return status ?? kAudioUnitErr_NoConnection
+        parameterTree?.implementorValueProvider = { param in
+            switch param.address {
+            case 0: return gPtr.pointee
+            case 1: return bPtr.pointee
+            default: return 0
             }
-            
-            // If bypassed, just return the input as-is
-            if bypassParam.value >= 0.5 {
-                return noErr
+        }
+    }
+
+    // MARK: - AUAudioUnit 重写
+
+    public override var inputBusses: AUAudioUnitBusArray { _inputBusArray }
+    public override var outputBusses: AUAudioUnitBusArray { _outputBusArray }
+
+    public override func allocateRenderResources() throws {
+        try super.allocateRenderResources()
+        log.info("渲染资源已分配")
+    }
+
+    public override func deallocateRenderResources() {
+        super.deallocateRenderResources()
+        log.info("渲染资源已释放")
+    }
+
+    /// 渲染块 —— 100% 实时安全
+    /// 仅捕获 UnsafeMutablePointer<Float>（值类型），不涉及 ARC、ObjC 消息发送、锁等
+    public override var internalRenderBlock: AUInternalRenderBlock {
+        let gPtr = _gainPtr
+        let bPtr = _bypassPtr
+
+        return { actionFlags, timestamp, frameCount, outputBusNumber,
+                 outputData, realtimeEventListHead, pullInputBlock in
+
+            // 拉取上游音频
+            guard let pull = pullInputBlock else { return kAudioUnitErr_NoConnection }
+            var flags = AudioUnitRenderActionFlags(rawValue: 0)
+            let err = pull(&flags, timestamp, frameCount, 0, outputData)
+            guard err == noErr else { return err }
+
+            // 旁通检查（纯内存读取）
+            guard bPtr.pointee < 0.5 else { return noErr }
+
+            // 应用增益（纯内存读取 + 浮点运算）
+            let gain = gPtr.pointee
+            let count = Int(outputData.pointee.mNumberBuffers)
+            let bufs  = UnsafeMutableAudioBufferListPointer(outputData)
+            for i in 0..<count {
+                guard let data = bufs[i].mData else { continue }
+                let samples = data.assumingMemoryBound(to: Float.self)
+                for f in 0..<Int(frameCount) { samples[f] *= gain }
             }
-            
-            // Apply gain to each channel
-            let currentGain = gainParam.value
-            let channelCount = Int(outputData.pointee.mNumberBuffers)
-            let buffers = UnsafeMutableAudioBufferListPointer(outputData)
-            
-            for bufferIndex in 0..<channelCount {
-                guard let buffer = buffers[bufferIndex].mData else { continue }
-                let floatBuffer = buffer.assumingMemoryBound(to: Float.self)
-                
-                for frame in 0..<Int(frameCount) {
-                    floatBuffer[frame] *= currentGain
-                }
-            }
-            
             return noErr
         }
     }
-    
-    // MARK: - View Controller
-    
-    public override func requestViewController(completionHandler: @escaping (AUViewController?) -> Void) {
-        DispatchQueue.main.async {
-            let viewController = EffectViewController(audioUnit: self)
-            completionHandler(viewController)
+
+    // MARK: - 视图控制器（进程内加载时的后备路径）
+
+    public override func requestViewController(completionHandler: @escaping (UIViewController?) -> Void) {
+        DispatchQueue.main.async { [weak self] in
+            guard let self = self else {
+                completionHandler(nil)
+                return
+            }
+            let vc = EffectViewController()
+            vc.audioUnit = self
+            completionHandler(vc)
         }
     }
 }
