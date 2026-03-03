@@ -161,7 +161,9 @@ public class AudioEngine {
             do {
                 testFile = try AVAudioFile(forReading: url)
                 log.info("Successfully loaded TestAudio.wav from bundle")
-                log.info("Audio format: \(testFile!.processingFormat.sampleRate) Hz, \(testFile!.processingFormat.channelCount) channels")
+                if let testFile {
+                    log.info("Audio format: \(testFile.processingFormat.sampleRate) Hz, \(testFile.processingFormat.channelCount) channels")
+                }
             } catch {
                 log.error("Failed to load TestAudio.wav: \(error.localizedDescription)")
                 generateFallbackAudio()
