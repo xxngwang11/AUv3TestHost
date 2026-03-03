@@ -258,6 +258,8 @@ public class AudioEngine {
         do {
             let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
             
+            // 直接使用用户选择的加载模式，不做自动回退。
+            // 如果 OOP 加载失败，应正向定位 OOP 本身的问题而非绕过。
             let audioUnit = try await AVAudioUnit.instantiate(
                 with: component.audioComponentDescription,
                 options: options
