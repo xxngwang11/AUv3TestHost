@@ -254,7 +254,7 @@ public class AudioEngine {
         // 2. Instantiate AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
-        let options: AudioComponentInstantiationOptions = .loadOutOfProcess
+        let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
         
         do {
             let audioUnit = try await AVAudioUnit.instantiate(
@@ -282,9 +282,11 @@ public class AudioEngine {
             // 5. Load ViewController
             let loadVCStart = CFAbsoluteTimeGetCurrent()
             let vc = await withCheckedContinuation { continuation in
-                    audioUnit.auAudioUnit.requestViewController { viewController in
-                        continuation.resume(returning: viewController as? AUViewController)
-                    }
+                audioUnit.auAudioUnit.requestViewController { viewController in
+                    continuation.resume(returning: viewController as? AUViewController)
+                }
+            }
+            currentViewController = vc
             let loadVCEnd = CFAbsoluteTimeGetCurrent()
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
