@@ -191,7 +191,18 @@ struct PluginDetailView: View {
                     Image(systemName: "info.circle.fill")
                         .foregroundColor(.orange)
                         .font(.caption)
-                    Text("首次进程外加载（冷启动）需要启动 XPC 宿主进程，耗时约 1-2 秒属于正常现象。后续加载将复用已运行的进程，速度会显著提升。")
+                    Text("首次进程外加载（冷启动）需要启动 XPC 宿主进程，耗时约 1-2 秒属于正常现象。后续加载将复用已运行的进程，速度会显著提升。系统内置插件不受此影响，因为它们始终以进程内方式加载。")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
+            
+            if !metrics.loadedOutOfProcess && isAppleSystemPlugin {
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: "bolt.fill")
+                        .foregroundColor(.green)
+                        .font(.caption)
+                    Text("此插件为 Apple 系统内置 v2 Audio Unit，已自动切换为进程内加载，无冷启动延迟。")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }

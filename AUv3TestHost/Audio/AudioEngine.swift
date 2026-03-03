@@ -33,6 +33,10 @@ public class AudioEngine {
     // Key = componentType|componentSubType|componentManufacturer
     private var warmPluginKeys: Set<String> = []
     
+    // FourCC "appl" (hex: 0x6170706C) used by Apple's built-in Audio Units.
+    // These are v2 AU embedded in system frameworks — always loaded in-process.
+    private let appleManufacturerCode: OSType = 0x6170706C
+    
     public init() {
         setupEngine()
         #if os(iOS)
@@ -249,10 +253,18 @@ public class AudioEngine {
             loadedOutOfProcess: outOfProcess
         )
         
-        // Detect cold start: first OOP load of this specific plugin type
+        // Apple system Audio Units (manufacturer "appl") are v2 AU embedded in
+        // system frameworks. They are always loaded in-process by the OS regardless
+        // of the .loadOutOfProcess flag, so we explicitly use in-process mode to
+        // keep the metrics accurate.
         let desc = component.audioComponentDescription
+        let isAppleSystemPlugin = desc.componentManufacturer == appleManufacturerCode
+        let effectiveOOP = isAppleSystemPlugin ? false : outOfProcess
+        metrics.loadedOutOfProcess = effectiveOOP
+        
+        // Detect cold start: first OOP load of this specific plugin type
         let pluginKey = "\(desc.componentType)|\(desc.componentSubType)|\(desc.componentManufacturer)"
-        if outOfProcess && !warmPluginKeys.contains(pluginKey) {
+        if effectiveOOP && !warmPluginKeys.contains(pluginKey) {
             metrics.isColdStart = true
         }
         
@@ -270,7 +282,7 @@ public class AudioEngine {
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         do {
-            let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
+            let options: AudioComponentInstantiationOptions = effectiveOOP ? .loadOutOfProcess : []
             
             // 直接使用用户选择的加载模式，不做自动回退。
             // 如果 OOP 加载失败，应正向定位 OOP 本身的问题而非绕过。
@@ -278,7 +290,6 @@ public class AudioEngine {
                 with: component.audioComponentDescription,
                 options: options
             )
-            metrics.loadedOutOfProcess = outOfProcess
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
