@@ -240,8 +240,12 @@ struct PluginDetailView: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
         }
         
-        let successCount = max(successLoads, 1)
-        let avgTime = totalTime / Double(successCount)
+        guard successLoads > 0 else {
+            print("Benchmark complete: 0 successful OOP loads")
+            return
+        }
+        
+        let avgTime = totalTime / Double(successLoads)
         print("Benchmark complete: Average load time = \(String(format: "%.2f", avgTime)) ms")
     }
 }

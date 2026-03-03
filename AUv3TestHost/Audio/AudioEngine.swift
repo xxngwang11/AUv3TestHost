@@ -316,10 +316,8 @@ public class AudioEngine {
                 } else if error.code == Int(kAudioUnitErr_FormatNotSupported) {
                     log.error("Format not supported - check audio format compatibility")
                 }
-            } else if error.localizedDescription.localizedCaseInsensitiveContains("acquiring assertion") {
-                log.error("Failed to load plugin in out-of-process mode due to process assertion error: \(error.localizedDescription)")
             } else {
-                log.error("Failed to load plugin: \(error.localizedDescription)")
+                log.error("Failed to load plugin (domain: \(error.domain), code: \(error.code)): \(error.localizedDescription)")
             }
             #else
             log.error("Failed to load plugin: \(error.localizedDescription)")
