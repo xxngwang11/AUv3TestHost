@@ -265,6 +265,7 @@ public class AudioEngine {
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            metrics.loadedOutOfProcess = outOfProcess
             
             self.currentAudioUnit = audioUnit
             
