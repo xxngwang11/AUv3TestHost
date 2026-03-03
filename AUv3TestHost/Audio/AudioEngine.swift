@@ -49,8 +49,9 @@ public class AudioEngine {
             log.info("Preferred sample rate: \(audioSession.preferredSampleRate) Hz")
             log.info("Preferred buffer duration: \(audioSession.preferredIOBufferDuration * 1000) ms")
             
-            // Set preferred buffer duration for low latency (5 milliseconds = 0.005 seconds)
-            let lowLatencyBufferDuration: TimeInterval = 0.005
+            // Set preferred buffer duration (12 milliseconds = 0.012 seconds)
+            // 过小的缓冲区（如 5ms）容易导致 IOWorkLoop overload，尤其在进程外加载时
+            let lowLatencyBufferDuration: TimeInterval = 0.012
             try audioSession.setPreferredIOBufferDuration(lowLatencyBufferDuration)
             
             // Add audio session interruption observer
@@ -230,7 +231,7 @@ public class AudioEngine {
     /// Load AUv3 plugin and measure performance
     public func loadPlugin(
         component: AVAudioUnitComponent,
-        outOfProcess: Bool = true
+        outOfProcess: Bool = false
     ) async -> PluginLoadMetrics {
         
         isLoading = true

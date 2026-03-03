@@ -8,7 +8,7 @@ struct ContentView: View {
     @State private var metricsManager = MetricsManager.shared
     
     @State private var selectedPlugin: AVAudioUnitComponent?
-    @State private var loadOutOfProcess = true
+    @State private var loadOutOfProcess = false
     @State private var showMetricsHistory = false
     @State private var showDiagnostics = false
     
