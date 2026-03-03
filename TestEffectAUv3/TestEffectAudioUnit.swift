@@ -130,7 +130,16 @@ public class TestEffectAudioUnit: AUAudioUnit {
     }
     
     public override var internalRenderBlock: AUInternalRenderBlock {
-        return { [weak self] (
+        // Capture AUParameter references instead of self.
+        // AUParameter.value is designed to be safely read from the real-time
+        // audio thread, whereas [weak self] involves ARC operations that are
+        // NOT real-time safe and cause EXC_BAD_ACCESS on the render thread.
+        guard let gainParam = self.gainParameter,
+              let bypassParam = self.bypassParameter else {
+            return { _, _, _, _, _, _, _ in return kAudioUnitErr_Uninitialized }
+        }
+
+        return { (
             actionFlags,
             timestamp,
             frameCount,
@@ -139,8 +148,6 @@ public class TestEffectAudioUnit: AUAudioUnit {
             realtimeEventListHead,
             pullInputBlock
         ) in
-            guard let self = self else { return kAudioUnitErr_NoConnection }
-            
             // Pull input
             var pullFlags = AudioUnitRenderActionFlags(rawValue: 0)
             let status = pullInputBlock?(&pullFlags, timestamp, frameCount, 0, outputData)
@@ -150,11 +157,12 @@ public class TestEffectAudioUnit: AUAudioUnit {
             }
             
             // If bypassed, just return the input as-is
-            if self.bypass {
+            if bypassParam.value >= 0.5 {
                 return noErr
             }
             
             // Apply gain to each channel
+            let currentGain = gainParam.value
             let channelCount = Int(outputData.pointee.mNumberBuffers)
             let buffers = UnsafeMutableAudioBufferListPointer(outputData)
             
@@ -163,7 +171,7 @@ public class TestEffectAudioUnit: AUAudioUnit {
                 let floatBuffer = buffer.assumingMemoryBound(to: Float.self)
                 
                 for frame in 0..<Int(frameCount) {
-                    floatBuffer[frame] *= self.gain
+                    floatBuffer[frame] *= currentGain
                 }
             }
             
