@@ -55,7 +55,7 @@ struct GenericParameterView: View {
                     .font(.subheadline)
                     .fontWeight(.medium)
                 Spacer()
-                Text(param.string(fromValue: currentBinding(for: param).wrappedValue))
+                Text(displayString(for: param))
                     .font(.caption)
                     .monospacedDigit()
                     .foregroundColor(.secondary)
@@ -72,6 +72,13 @@ struct GenericParameterView: View {
             }
         }
         .padding(.vertical, 4)
+    }
+
+    // MARK: - Display
+
+    private func displayString(for param: AUParameter) -> String {
+        var value = paramValues[param.address] ?? param.value
+        return withUnsafePointer(to: &value) { param.string(fromValue: $0) }
     }
 
     // MARK: - Bindings
