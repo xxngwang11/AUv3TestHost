@@ -95,7 +95,7 @@ struct EffectView: View {
                 
                 // Parameter display
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("状态:")
+                    Text("状态：")
                         .font(.caption)
                         .foregroundColor(.secondary)
                     Text("增益 = \(String(format: "%.2f", gain))，旁通 = \(bypass ? "开" : "关")")

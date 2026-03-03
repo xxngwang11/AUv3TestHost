@@ -15,7 +15,7 @@ struct ContentView: View {
                 .multilineTextAlignment(.center)
                 .padding()
             
-            Text("安装说明:")
+            Text("安装说明：")
                 .font(.headline)
                 .padding(.top)
             

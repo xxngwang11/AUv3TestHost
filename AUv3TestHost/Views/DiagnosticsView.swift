@@ -80,7 +80,7 @@ struct DiagnosticsView: View {
             
             if !scanner.scanDiagnostics.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("扫描诊断:")
+                    Text("扫描诊断：")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -93,7 +93,7 @@ struct DiagnosticsView: View {
             }
             
             if let error = scanner.lastScanError {
-                Text("错误: \(error)")
+                Text("错误：\(error)")
                     .font(.caption)
                     .foregroundColor(.red)
                     .padding(.top, 4)

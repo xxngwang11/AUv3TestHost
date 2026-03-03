@@ -85,7 +85,7 @@ struct PluginDetailView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                Text("版本: \(plugin.versionString)")
+                Text("版本：\(plugin.versionString)")
   	                    .font(.caption)
   	                    .foregroundColor(.secondary)
             }
