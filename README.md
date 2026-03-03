@@ -2,6 +2,14 @@
 
 A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Unit v3) plugin load performance.
 
+## 项目组成（3 个项目/Target）
+
+是的，这个工程包含 3 个主要项目（Target）：
+
+1. **AUv3TestHost**：主宿主应用，用于扫描、加载并测试 AUv3 插件的加载性能。
+2. **TestPluginContainer**：iOS 容器应用，用于承载并注册测试插件。
+3. **TestEffectAUv3**：示例 AUv3 效果器插件（带增益与旁路控制），用于被宿主加载和验证音频链路。
+
 ## Features
 
 - 🔍 **Plugin Discovery**: Scan and list all installed AUv3 plugins by type (Effect, Instrument, MIDI Processor, etc.)
