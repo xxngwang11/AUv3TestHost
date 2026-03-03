@@ -254,7 +254,7 @@ The app uses the `.playAndRecord` audio session category with:
 ## Code Quality
 
 ### Review Findings Addressed
-1. **AVFoundation Key Naming**: Fixed `AVLinearPCMIsNonInterleaved` to use proper `Key` suffix: `AVLinearPCMIsNonInterleavedKey`
+1. **AVFoundation Key Naming**: Use the correct AVFoundation constant `AVLinearPCMIsNonInterleaved` in audio settings
 2. **Race Condition Prevention**: Enhanced `scheduleAudioLoop()` with double-checking and proper flag ordering in `stopPlaying()`
 
 ### Security

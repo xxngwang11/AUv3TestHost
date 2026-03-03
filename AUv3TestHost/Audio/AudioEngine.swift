@@ -159,9 +159,10 @@ public class AudioEngine {
         // Load test audio from Resources
         if let url = Bundle.main.url(forResource: "TestAudio", withExtension: "wav") {
             do {
-                testFile = try AVAudioFile(forReading: url)
+                let loadedTestFile = try AVAudioFile(forReading: url)
+                testFile = loadedTestFile
                 log.info("Successfully loaded TestAudio.wav from bundle")
-                log.info("Audio format: \(testFile!.processingFormat.sampleRate) Hz, \(testFile!.processingFormat.channelCount) channels")
+                log.info("Audio format: \(loadedTestFile.processingFormat.sampleRate) Hz, \(loadedTestFile.processingFormat.channelCount) channels")
             } catch {
                 log.error("Failed to load TestAudio.wav: \(error.localizedDescription)")
                 generateFallbackAudio()
@@ -211,7 +212,7 @@ public class AudioEngine {
                 AVLinearPCMBitDepthKey: 16,
                 AVLinearPCMIsFloatKey: false,
                 AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsNonInterleavedKey: false
+                AVLinearPCMIsNonInterleaved: false
             ]
             
             let file = try AVAudioFile(forWriting: tempURL, settings: settings)
