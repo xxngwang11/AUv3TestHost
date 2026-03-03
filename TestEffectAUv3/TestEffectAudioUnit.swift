@@ -31,10 +31,10 @@ public class TestEffectAudioUnit: AUAudioUnit {
         inputBus = try AUAudioUnitBus(format: defaultFormat)
         outputBus = try AUAudioUnitBus(format: defaultFormat)
         
-        inputBusArray = AUAudioUnitBusArray(audioUnit: nil, busType: .input, busses: [inputBus])
-        outputBusArray = AUAudioUnitBusArray(audioUnit: nil, busType: .output, busses: [outputBus])
-        
         try super.init(componentDescription: componentDescription, options: options)
+        
+        inputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .input, busses: [inputBus])
+        outputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .output, busses: [outputBus])
         
         // Setup parameters
         setupParameterTree()
