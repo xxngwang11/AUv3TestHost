@@ -8,7 +8,6 @@ struct ContentView: View {
     @State private var metricsManager = MetricsManager.shared
     
     @State private var selectedPlugin: AVAudioUnitComponent?
-    @State private var loadOutOfProcess = true
     @State private var showMetricsHistory = false
     @State private var showDiagnostics = false
     
@@ -48,10 +47,6 @@ struct ContentView: View {
                     scanner.scan()
                 }
                 
-                // 加载选项
-                Toggle("进程外加载", isOn: $loadOutOfProcess)
-                    .padding(.horizontal)
-                
                 // 插件列表
                 List(scanner.plugins, id: \.name) { plugin in
                     Button {
@@ -72,8 +67,7 @@ struct ContentView: View {
             .navigationDestination(item: $selectedPlugin) { plugin in
                 PluginDetailView(
                     plugin: plugin,
-                    engine: engine,
-                    loadOutOfProcess: loadOutOfProcess
+                    engine: engine
                 )
                 .navigationTitle(plugin.name)
                 .navigationBarTitleDisplayMode(.inline)
@@ -126,10 +120,6 @@ struct ContentView: View {
                     scanner.scan()
                 }
                 
-                // 加载选项
-                Toggle("进程外加载", isOn: $loadOutOfProcess)
-                    .padding(.horizontal)
-                
                 // 插件列表
                 List(scanner.plugins, id: \.name, selection: $selectedPlugin) { plugin in
                     PluginRow(plugin: plugin)
@@ -152,8 +142,7 @@ struct ContentView: View {
             if let plugin = selectedPlugin {
                 PluginDetailView(
                     plugin: plugin,
-                    engine: engine,
-                    loadOutOfProcess: loadOutOfProcess
+                    engine: engine
                 )
             } else {
                 ContentUnavailableView(

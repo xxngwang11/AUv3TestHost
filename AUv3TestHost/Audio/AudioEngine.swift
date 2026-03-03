@@ -29,6 +29,14 @@ public class AudioEngine {
     // Test audio file
     private var testFile: AVAudioFile?
     
+    // Track plugins that have been loaded OOP to detect cold starts.
+    // Key = componentType|componentSubType|componentManufacturer
+    private var warmPluginKeys: Set<String> = []
+    
+    // FourCC "appl" (hex: 0x6170706C) used by Apple's built-in Audio Units.
+    // These are v2 AU embedded in system frameworks — always loaded in-process.
+    private let appleManufacturerCode: OSType = 0x6170706C
+    
     public init() {
         setupEngine()
         #if os(iOS)
@@ -49,8 +57,11 @@ public class AudioEngine {
             log.info("Preferred sample rate: \(audioSession.preferredSampleRate) Hz")
             log.info("Preferred buffer duration: \(audioSession.preferredIOBufferDuration * 1000) ms")
             
-            // Set preferred buffer duration for low latency (5 milliseconds = 0.005 seconds)
-            let lowLatencyBufferDuration: TimeInterval = 0.005
+            // Set preferred buffer duration (~23 ms)
+            // OOP（进程外）加载时每个渲染周期包含 XPC 往返开销，
+            // 过小的缓冲区容易触发 HALC_ProxyIOContext IOWorkLoop overload。
+            // 作为 OOP 测试宿主，优先保证稳定性而非极低延迟。
+            let lowLatencyBufferDuration: TimeInterval = 0.023
             try audioSession.setPreferredIOBufferDuration(lowLatencyBufferDuration)
             
             // Add audio session interruption observer
@@ -242,6 +253,21 @@ public class AudioEngine {
             loadedOutOfProcess: outOfProcess
         )
         
+        // Apple system Audio Units (manufacturer "appl") are v2 AU embedded in
+        // system frameworks. They are always loaded in-process by the OS regardless
+        // of the .loadOutOfProcess flag, so we explicitly use in-process mode to
+        // keep the metrics accurate.
+        let desc = component.audioComponentDescription
+        let isAppleSystemPlugin = desc.componentManufacturer == appleManufacturerCode
+        let effectiveOOP = isAppleSystemPlugin ? false : outOfProcess
+        metrics.loadedOutOfProcess = effectiveOOP
+        
+        // Detect cold start: first OOP load of this specific plugin type
+        let pluginKey = "\(desc.componentType)|\(desc.componentSubType)|\(desc.componentManufacturer)"
+        if effectiveOOP && !warmPluginKeys.contains(pluginKey) {
+            metrics.isColdStart = true
+        }
+        
         let totalStart = CFAbsoluteTimeGetCurrent()
         
         // 1. Unload current plugin
@@ -256,7 +282,7 @@ public class AudioEngine {
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         do {
-            let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
+            let options: AudioComponentInstantiationOptions = effectiveOOP ? .loadOutOfProcess : []
             
             // 直接使用用户选择的加载模式，不做自动回退。
             // 如果 OOP 加载失败，应正向定位 OOP 本身的问题而非绕过。
@@ -264,12 +290,14 @@ public class AudioEngine {
                 with: component.audioComponentDescription,
                 options: options
             )
-            metrics.loadedOutOfProcess = outOfProcess
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
             
             self.currentAudioUnit = audioUnit
+            
+            // Mark this plugin as warm for future cold-start detection
+            warmPluginKeys.insert(pluginKey)
             
             // 3. Connect audio graph
             let connectStart = CFAbsoluteTimeGetCurrent()
@@ -304,6 +332,12 @@ public class AudioEngine {
             currentViewController = vc
             let loadVCEnd = CFAbsoluteTimeGetCurrent()
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
+            
+            if vc != nil {
+                log.info("ViewController loaded for \(componentName)")
+            } else {
+                log.info("No ViewController provided by \(componentName) — will use generic parameter UI")
+            }
             
         } catch let error as NSError {
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
