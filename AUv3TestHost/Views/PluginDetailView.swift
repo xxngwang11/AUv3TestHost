@@ -222,7 +222,7 @@ struct PluginDetailView: View {
         defer { isLoading = false }
         
         var totalTime: Double = 0
-        var successLoads = 0
+        var successfulLoadCount = 0
         
         for _ in 0..<times {
             let metrics = await engine.loadPlugin(
@@ -232,7 +232,7 @@ struct PluginDetailView: View {
             if engine.currentAudioUnit != nil {
                 totalTime += metrics.totalTime
                 loadCount += 1
-                successLoads += 1
+                successfulLoadCount += 1
                 currentMetrics = metrics
             }
             
@@ -240,12 +240,12 @@ struct PluginDetailView: View {
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
         }
         
-        guard successLoads > 0 else {
-            print("Benchmark complete: 0 successful OOP loads")
+        guard successfulLoadCount > 0 else {
+            print("Benchmark complete: 0 successful out-of-process loads")
             return
         }
         
-        let avgTime = totalTime / Double(successLoads)
+        let avgTime = totalTime / Double(successfulLoadCount)
         print("Benchmark complete: Average load time = \(String(format: "%.2f", avgTime)) ms")
     }
 }
