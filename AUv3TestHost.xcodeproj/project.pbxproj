@@ -18,6 +18,7 @@ AA0001000000000000000008 /* MetricBar.swift in Sources */ = {isa = PBXBuildFile;
 AA0001000000000000000009 /* MetricsHistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA1001000000000000000009 /* MetricsHistoryView.swift */; };
 AA000100000000000000000A /* DiagnosticsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100100000000000000000A /* DiagnosticsView.swift */; };
 AA000100000000000000000B /* AUViewControllerRepresentable.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100100000000000000000B /* AUViewControllerRepresentable.swift */; };
+AA000100000000000000000E /* GenericParameterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AA100100000000000000000C /* GenericParameterView.swift */; };
 AA000100000000000000000C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AA200100000000000000000C /* Assets.xcassets */; };
 AA000100000000000000000D /* TestAudio.wav in Resources */ = {isa = PBXBuildFile; fileRef = AA200100000000000000000F /* TestAudio.wav */; };
 BB0001000000000000000001 /* ContainerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = BB1001000000000000000001 /* ContainerApp.swift */; };
@@ -65,6 +66,7 @@ AA1001000000000000000008 /* MetricBar.swift */ = {isa = PBXFileReference; lastKn
 AA1001000000000000000009 /* MetricsHistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetricsHistoryView.swift; sourceTree = "<group>"; };
 AA100100000000000000000A /* DiagnosticsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagnosticsView.swift; sourceTree = "<group>"; };
 AA100100000000000000000B /* AUViewControllerRepresentable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AUViewControllerRepresentable.swift; sourceTree = "<group>"; };
+AA100100000000000000000C /* GenericParameterView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GenericParameterView.swift; sourceTree = "<group>"; };
 AA200100000000000000000C /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 AA200100000000000000000D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 AA200100000000000000000E /* AUv3TestHost.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = AUv3TestHost.entitlements; sourceTree = "<group>"; };
@@ -167,6 +169,7 @@ AA1001000000000000000008 /* MetricBar.swift */,
 AA1001000000000000000009 /* MetricsHistoryView.swift */,
 AA100100000000000000000A /* DiagnosticsView.swift */,
 AA100100000000000000000B /* AUViewControllerRepresentable.swift */,
+AA100100000000000000000C /* GenericParameterView.swift */,
 );
 path = Views;
 sourceTree = "<group>";
@@ -338,6 +341,7 @@ AA0001000000000000000007 /* PluginRow.swift in Sources */,
 AA0001000000000000000008 /* MetricBar.swift in Sources */,
 AA0001000000000000000009 /* MetricsHistoryView.swift in Sources */,
 AA000100000000000000000A /* DiagnosticsView.swift in Sources */,
+AA000100000000000000000E /* GenericParameterView.swift in Sources */,
 AA000100000000000000000B /* AUViewControllerRepresentable.swift in Sources */,
 );
 runOnlyForDeploymentPostprocessing = 0;
