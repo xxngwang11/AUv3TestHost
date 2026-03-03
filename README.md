@@ -8,7 +8,7 @@ A simple macOS/iOS host application for testing and benchmarking AUv3 (Audio Uni
 
 1. **AUv3TestHost**：主宿主应用，用于扫描、加载并测试 AUv3 插件的加载性能。
 2. **TestPluginContainer**：iOS 容器应用，用于承载并注册测试插件。
-3. **TestEffectAUv3**：示例 AUv3 效果器插件（带增益与旁路控制），用于被宿主加载和验证音频链路。
+3. **TestEffectAUv3**：示例 AUv3 效果器插件（带增益与旁路控制），用于被宿主加载和验证音频链路，并且本身提供 SwiftUI UI（`EffectViewController.swift`）。
 
 ## Features
 
