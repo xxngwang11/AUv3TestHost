@@ -256,28 +256,13 @@ public class AudioEngine {
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         do {
-            var audioUnit: AVAudioUnit
             let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
             
-            do {
-                audioUnit = try await AVAudioUnit.instantiate(
-                    with: component.audioComponentDescription,
-                    options: options
-                )
-                metrics.loadedOutOfProcess = outOfProcess
-            } catch let outOfProcessError where outOfProcess {
-                // Out-of-process loading failed (e.g. "Error acquiring assertion"),
-                // retry with in-process loading as a fallback
-                log.warning("Out-of-process loading failed: \(outOfProcessError.localizedDescription). Retrying in-process...")
-                audioUnit = try await AVAudioUnit.instantiate(
-                    with: component.audioComponentDescription,
-                    options: []
-                )
-                metrics.loadedOutOfProcess = false
-                metrics.retriedInProcess = true
-                metrics.errorMessage = "Out-of-process load failed, loaded in-process: \(outOfProcessError.localizedDescription)"
-                log.info("In-process loading succeeded as fallback")
-            }
+            let audioUnit = try await AVAudioUnit.instantiate(
+                with: component.audioComponentDescription,
+                options: options
+            )
+            metrics.loadedOutOfProcess = outOfProcess
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000

@@ -140,17 +140,6 @@ struct PluginDetailView: View {
                     .cornerRadius(4)
             }
             
-            // Show fallback/error info
-            if metrics.retriedInProcess {
-                HStack {
-                    Image(systemName: "exclamationmark.triangle.fill")
-                        .foregroundColor(.orange)
-                    Text("进程外加载失败，已回退为进程内加载")
-                        .font(.caption)
-                        .foregroundColor(.orange)
-                }
-            }
-            
             if let errorMessage = metrics.errorMessage, engine.currentAudioUnit == nil {
                 HStack(alignment: .top) {
                     Image(systemName: "xmark.circle.fill")
