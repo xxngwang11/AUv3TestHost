@@ -49,9 +49,11 @@ public class AudioEngine {
             log.info("Preferred sample rate: \(audioSession.preferredSampleRate) Hz")
             log.info("Preferred buffer duration: \(audioSession.preferredIOBufferDuration * 1000) ms")
             
-            // Set preferred buffer duration (12 milliseconds = 0.012 seconds)
-            // 过小的缓冲区（如 5ms）容易导致 IOWorkLoop overload，尤其在进程外加载时
-            let lowLatencyBufferDuration: TimeInterval = 0.012
+            // Set preferred buffer duration (~23 ms)
+            // OOP（进程外）加载时每个渲染周期包含 XPC 往返开销，
+            // 过小的缓冲区容易触发 HALC_ProxyIOContext IOWorkLoop overload。
+            // 作为 OOP 测试宿主，优先保证稳定性而非极低延迟。
+            let lowLatencyBufferDuration: TimeInterval = 0.023
             try audioSession.setPreferredIOBufferDuration(lowLatencyBufferDuration)
             
             // Add audio session interruption observer
