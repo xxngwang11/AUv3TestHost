@@ -18,6 +18,10 @@ public struct PluginLoadMetrics: Identifiable {
     // 加载选项
     public var loadedOutOfProcess: Bool = true
     
+    // 错误与回退信息
+    public var errorMessage: String?
+    public var retriedInProcess: Bool = false
+    
     public var summary: String {
         return String(format: "Total: %.2f ms (Instantiate: %.2f ms)", totalTime, instantiateTime)
     }

@@ -256,16 +256,31 @@ public class AudioEngine {
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         do {
-            let audioUnit: AVAudioUnit
+            var audioUnit: AVAudioUnit
             let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
-            audioUnit = try await AVAudioUnit.instantiate(
-                with: component.audioComponentDescription,
-                options: options
-            )
+            
+            do {
+                audioUnit = try await AVAudioUnit.instantiate(
+                    with: component.audioComponentDescription,
+                    options: options
+                )
+                metrics.loadedOutOfProcess = outOfProcess
+            } catch let outOfProcessError where outOfProcess {
+                // Out-of-process loading failed (e.g. "Error acquiring assertion"),
+                // retry with in-process loading as a fallback
+                log.warning("Out-of-process loading failed: \(outOfProcessError.localizedDescription). Retrying in-process...")
+                audioUnit = try await AVAudioUnit.instantiate(
+                    with: component.audioComponentDescription,
+                    options: []
+                )
+                metrics.loadedOutOfProcess = false
+                metrics.retriedInProcess = true
+                metrics.errorMessage = "Out-of-process load failed, loaded in-process: \(outOfProcessError.localizedDescription)"
+                log.info("In-process loading succeeded as fallback")
+            }
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
-            metrics.loadedOutOfProcess = outOfProcess
             
             self.currentAudioUnit = audioUnit
             
@@ -306,6 +321,7 @@ public class AudioEngine {
         } catch let error as NSError {
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            metrics.errorMessage = error.localizedDescription
             
             #if os(iOS)
             // iOS-specific error handling

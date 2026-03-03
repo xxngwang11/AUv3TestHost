@@ -140,6 +140,27 @@ struct PluginDetailView: View {
                     .cornerRadius(4)
             }
             
+            // Show fallback/error info
+            if metrics.retriedInProcess {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .foregroundColor(.orange)
+                    Text("Out-of-process failed, loaded in-process as fallback")
+                        .font(.caption)
+                        .foregroundColor(.orange)
+                }
+            }
+            
+            if let errorMessage = metrics.errorMessage, engine.currentAudioUnit == nil {
+                HStack(alignment: .top) {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundColor(.red)
+                    Text(errorMessage)
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+            }
+            
             // 指标条形图
             VStack(spacing: 8) {
                 MetricBar(label: "Instantiate", value: metrics.instantiateTime, maxValue: metrics.totalTime, color: .blue)
@@ -250,11 +271,9 @@ struct PluginDetailView: View {
             component: plugin,
             outOfProcess: loadOutOfProcess
         )
+        currentMetrics = metrics
         if engine.currentAudioUnit != nil {
-            currentMetrics = metrics
             loadCount += 1
-        } else {
-            currentMetrics = nil
         }
     }
     
