@@ -256,16 +256,18 @@ public class AudioEngine {
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
         do {
-            let audioUnit: AVAudioUnit
             let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
-            audioUnit = try await AVAudioUnit.instantiate(
+            
+            // 直接使用用户选择的加载模式，不做自动回退。
+            // 如果 OOP 加载失败，应正向定位 OOP 本身的问题而非绕过。
+            let audioUnit = try await AVAudioUnit.instantiate(
                 with: component.audioComponentDescription,
                 options: options
             )
+            metrics.loadedOutOfProcess = outOfProcess
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
-            metrics.loadedOutOfProcess = outOfProcess
             
             self.currentAudioUnit = audioUnit
             
@@ -306,6 +308,7 @@ public class AudioEngine {
         } catch let error as NSError {
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            metrics.errorMessage = error.localizedDescription
             
             #if os(iOS)
             // iOS-specific error handling

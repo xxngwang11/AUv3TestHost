@@ -35,11 +35,11 @@ struct DiagnosticsView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Diagnostics")
+            .navigationTitle("诊断信息")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button("Refresh") {
+                    Button("刷新") {
                         updateDiagnostics()
                     }
                 }
@@ -52,18 +52,18 @@ struct DiagnosticsView: View {
     
     private var systemInfoSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("System Information")
+            Text("系统信息")
                 .font(.headline)
             
             #if os(iOS)
-            InfoRow(label: "Platform", value: "iOS")
-            InfoRow(label: "Device", value: UIDevice.current.model)
-            InfoRow(label: "OS Version", value: UIDevice.current.systemVersion)
+            InfoRow(label: "平台", value: "iOS")
+            InfoRow(label: "设备", value: UIDevice.current.model)
+            InfoRow(label: "系统版本", value: UIDevice.current.systemVersion)
             #else
-            InfoRow(label: "Platform", value: "macOS")
+            InfoRow(label: "平台", value: "macOS")
             #endif
             
-            InfoRow(label: "App Version", value: "1.0")
+            InfoRow(label: "应用版本", value: "1.0")
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
@@ -72,15 +72,15 @@ struct DiagnosticsView: View {
     
     private var scannerDiagnosticsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Plugin Scanner")
+            Text("插件扫描器")
                 .font(.headline)
             
-            InfoRow(label: "Selected Type", value: scanner.selectedType.rawValue)
-            InfoRow(label: "Plugins Found", value: "\(scanner.plugins.count)")
+            InfoRow(label: "选中类型", value: scanner.selectedType.rawValue)
+            InfoRow(label: "已发现插件", value: "\(scanner.plugins.count)")
             
             if !scanner.scanDiagnostics.isEmpty {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Scan Diagnostics:")
+                    Text("扫描诊断：")
                         .font(.subheadline)
                         .foregroundColor(.secondary)
                     
@@ -93,7 +93,7 @@ struct DiagnosticsView: View {
             }
             
             if let error = scanner.lastScanError {
-                Text("Error: \(error)")
+                Text("错误：\(error)")
                     .font(.caption)
                     .foregroundColor(.red)
                     .padding(.top, 4)
@@ -107,22 +107,22 @@ struct DiagnosticsView: View {
     #if os(iOS)
     private var audioSessionSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Audio Session")
+            Text("音频会话")
                 .font(.headline)
             
             let audioSession = AVAudioSession.sharedInstance()
             
-            InfoRow(label: "Category", value: audioSession.category.rawValue)
-            InfoRow(label: "Mode", value: audioSession.mode.rawValue)
-            InfoRow(label: "Sample Rate", value: "\(Int(audioSession.sampleRate)) Hz")
-            InfoRow(label: "Buffer Duration", value: String(format: "%.2f ms", audioSession.ioBufferDuration * 1000))
-            InfoRow(label: "Input Channels", value: "\(audioSession.inputNumberOfChannels)")
-            InfoRow(label: "Output Channels", value: "\(audioSession.outputNumberOfChannels)")
+            InfoRow(label: "类别", value: audioSession.category.rawValue)
+            InfoRow(label: "模式", value: audioSession.mode.rawValue)
+            InfoRow(label: "采样率", value: "\(Int(audioSession.sampleRate)) Hz")
+            InfoRow(label: "缓冲时长", value: String(format: "%.2f ms", audioSession.ioBufferDuration * 1000))
+            InfoRow(label: "输入声道", value: "\(audioSession.inputNumberOfChannels)")
+            InfoRow(label: "输出声道", value: "\(audioSession.outputNumberOfChannels)")
             
             // Current route
             let currentRoute = audioSession.currentRoute
             if !currentRoute.outputs.isEmpty {
-                Text("Output: \(currentRoute.outputs.first?.portName ?? "Unknown")")
+                Text("输出: \(currentRoute.outputs.first?.portName ?? "未知")")
                     .font(.caption)
                     .foregroundColor(.secondary)
             }
@@ -135,40 +135,40 @@ struct DiagnosticsView: View {
     
     private var recommendationsSection: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Troubleshooting Tips")
+            Text("故障排除提示")
                 .font(.headline)
             
             VStack(alignment: .leading, spacing: 12) {
                 RecommendationRow(
                     icon: "checkmark.circle.fill",
-                    text: "Ensure AUv3 plugins are installed from the App Store",
+                    text: "请确保已从 App Store 安装 AUv3 插件",
                     color: .blue
                 )
                 
                 #if os(iOS)
                 RecommendationRow(
                     icon: "mic.fill",
-                    text: "Grant microphone permission in Settings → Privacy",
+                    text: "请在 设置 → 隐私 中授予麦克风权限",
                     color: .orange
                 )
                 
                 RecommendationRow(
                     icon: "speaker.wave.2.fill",
-                    text: "Check audio session is properly configured (see above)",
+                    text: "请检查音频会话配置是否正确（见上方）",
                     color: .green
                 )
                 #endif
                 
                 RecommendationRow(
                     icon: "arrow.clockwise",
-                    text: "Try refreshing the plugin list after installing new plugins",
+                    text: "安装新插件后请尝试刷新插件列表",
                     color: .purple
                 )
                 
                 if scanner.plugins.isEmpty {
                     RecommendationRow(
                         icon: "exclamationmark.triangle.fill",
-                        text: "No plugins found - install AUv3 plugins to test",
+                        text: "未发现插件 - 请安装 AUv3 插件以进行测试",
                         color: .red
                     )
                 }

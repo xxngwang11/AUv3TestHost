@@ -37,7 +37,7 @@ struct ContentView: View {
         NavigationStack {
             VStack {
                 // 插件类型选择
-                Picker("Type", selection: $scanner.selectedType) {
+                Picker("类型", selection: $scanner.selectedType) {
                     ForEach(AudioUnitType.allCases) { type in
                         Text(type.rawValue).tag(type)
                     }
@@ -49,7 +49,7 @@ struct ContentView: View {
                 }
                 
                 // 加载选项
-                Toggle("Out-of-Process", isOn: $loadOutOfProcess)
+                Toggle("进程外加载", isOn: $loadOutOfProcess)
                     .padding(.horizontal)
                 
                 // 插件列表
@@ -63,12 +63,12 @@ struct ContentView: View {
                 .listStyle(.inset)
                 
                 // 扫描按钮
-                Button("Refresh Plugins") {
+                Button("刷新插件列表") {
                     scanner.scan()
                 }
                 .padding()
             }
-            .navigationTitle("AUv3 Plugins")
+            .navigationTitle("AUv3 插件")
             .navigationDestination(item: $selectedPlugin) { plugin in
                 PluginDetailView(
                     plugin: plugin,
@@ -115,7 +115,7 @@ struct ContentView: View {
             // 左侧：插件列表
             VStack {
                 // 插件类型选择
-                Picker("Type", selection: $scanner.selectedType) {
+                Picker("类型", selection: $scanner.selectedType) {
                     ForEach(AudioUnitType.allCases) { type in
                         Text(type.rawValue).tag(type)
                     }
@@ -127,7 +127,7 @@ struct ContentView: View {
                 }
                 
                 // 加载选项
-                Toggle("Out-of-Process", isOn: $loadOutOfProcess)
+                Toggle("进程外加载", isOn: $loadOutOfProcess)
                     .padding(.horizontal)
                 
                 // 插件列表
@@ -137,12 +137,12 @@ struct ContentView: View {
                 .listStyle(.inset)
                 
                 // 扫描按钮
-                Button("Refresh Plugins") {
+                Button("刷新插件列表") {
                     scanner.scan()
                 }
                 .padding()
             }
-            .navigationTitle("AUv3 Plugins")
+            .navigationTitle("AUv3 插件")
             #if os(macOS)
             .frame(minWidth: 250)
             #endif
@@ -157,9 +157,9 @@ struct ContentView: View {
                 )
             } else {
                 ContentUnavailableView(
-                    "Select a Plugin",
+                    "请选择插件",
                     systemImage: "slider.horizontal.3",
-                    description: Text("Choose a plugin from the list to load and test")
+                    description: Text("从列表中选择一个插件进行加载和测试")
                 )
             }
         }

@@ -56,14 +56,14 @@ struct EffectView: View {
     
     var body: some View {
         VStack(spacing: 20) {
-            Text("Test Effect")
+            Text("测试效果器")
                 .font(.title2)
                 .fontWeight(.bold)
             
             VStack(alignment: .leading, spacing: 16) {
                 // Bypass toggle
                 HStack {
-                    Text("Bypass")
+                    Text("旁通")
                         .font(.headline)
                     Spacer()
                     Toggle("", isOn: $bypass)
@@ -74,7 +74,7 @@ struct EffectView: View {
                 
                 // Gain slider
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Gain")
+                    Text("增益")
                         .font(.headline)
                     HStack {
                         Text("0.0")
@@ -95,10 +95,10 @@ struct EffectView: View {
                 
                 // Parameter display
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Status:")
+                    Text("状态：")
                         .font(.caption)
                         .foregroundColor(.secondary)
-                    Text("Gain = \(String(format: "%.2f", gain)), Bypass = \(bypass ? "On" : "Off")")
+                    Text("增益 = \(String(format: "%.2f", gain))，旁通 = \(bypass ? "开" : "关")")
                         .font(.body)
                         .foregroundColor(.primary)
                 }
