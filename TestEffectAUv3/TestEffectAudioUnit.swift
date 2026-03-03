@@ -8,8 +8,8 @@ public class TestEffectAudioUnit: AUAudioUnit {
     private let log = Logger(subsystem: "com.test.TestEffectAUv3", category: "AudioUnit")
     
     // Audio format
-    private var inputBus: AUAudioUnitBus
-    private var outputBus: AUAudioUnitBus
+    private var inputBus: AUAudioUnitBus!
+    private var outputBus: AUAudioUnitBus!
     private var inputBusArray: AUAudioUnitBusArray!
     private var outputBusArray: AUAudioUnitBusArray!
     
@@ -28,11 +28,13 @@ public class TestEffectAudioUnit: AUAudioUnit {
         let defaultFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
         
         // Create input/output busses
-        inputBus = try AUAudioUnitBus(format: defaultFormat)
-        outputBus = try AUAudioUnitBus(format: defaultFormat)
+        let inputBus = try AUAudioUnitBus(format: defaultFormat)
+        let outputBus = try AUAudioUnitBus(format: defaultFormat)
         
         try super.init(componentDescription: componentDescription, options: options)
         
+        self.inputBus = inputBus
+        self.outputBus = outputBus
         inputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .input, busses: [inputBus])
         outputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .output, busses: [outputBus])
         
