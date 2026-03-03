@@ -212,7 +212,7 @@ public class AudioEngine {
                 AVLinearPCMBitDepthKey: 16,
                 AVLinearPCMIsFloatKey: false,
                 AVLinearPCMIsBigEndianKey: false,
-                AVLinearPCMIsNonInterleavedKey: false
+                AVLinearPCMIsNonInterleaved: false
             ]
             
             let file = try AVAudioFile(forWriting: tempURL, settings: settings)
