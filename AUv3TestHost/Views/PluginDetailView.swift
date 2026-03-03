@@ -209,9 +209,12 @@ struct PluginDetailView: View {
             component: plugin,
             outOfProcess: loadOutOfProcess
         )
-        
-        currentMetrics = metrics
-        loadCount += 1
+        if engine.currentAudioUnit != nil {
+            currentMetrics = metrics
+            loadCount += 1
+        } else {
+            currentMetrics = nil
+        }
     }
     
     private func runBenchmark(times: Int) async {
@@ -219,20 +222,26 @@ struct PluginDetailView: View {
         defer { isLoading = false }
         
         var totalTime: Double = 0
+        var successLoads = 0
         
         for _ in 0..<times {
             let metrics = await engine.loadPlugin(
                 component: plugin,
                 outOfProcess: loadOutOfProcess
             )
-            totalTime += metrics.totalTime
-            loadCount += 1
+            if engine.currentAudioUnit != nil {
+                totalTime += metrics.totalTime
+                loadCount += 1
+                successLoads += 1
+                currentMetrics = metrics
+            }
             
             // 等待一下再进行下一次
             try? await Task.sleep(nanoseconds: 500_000_000) // 0.5s
         }
         
-        let avgTime = totalTime / Double(times)
+        let successCount = max(successLoads, 1)
+        let avgTime = totalTime / Double(successCount)
         print("Benchmark complete: Average load time = \(String(format: "%.2f", avgTime)) ms")
     }
 }

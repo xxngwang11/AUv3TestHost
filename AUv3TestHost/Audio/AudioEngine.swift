@@ -304,6 +304,9 @@ public class AudioEngine {
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
         } catch let error as NSError {
+            let instantiateEnd = CFAbsoluteTimeGetCurrent()
+            metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            
             #if os(iOS)
             // iOS-specific error handling
             if error.domain == NSOSStatusErrorDomain {
@@ -313,6 +316,8 @@ public class AudioEngine {
                 } else if error.code == Int(kAudioUnitErr_FormatNotSupported) {
                     log.error("Format not supported - check audio format compatibility")
                 }
+            } else if error.localizedDescription.localizedCaseInsensitiveContains("acquiring assertion") {
+                log.error("Failed to load plugin in out-of-process mode due to process assertion error: \(error.localizedDescription)")
             } else {
                 log.error("Failed to load plugin: \(error.localizedDescription)")
             }
