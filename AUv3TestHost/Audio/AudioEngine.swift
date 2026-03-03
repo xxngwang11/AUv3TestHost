@@ -282,13 +282,18 @@ public class AudioEngine {
             
             // 5. Load ViewController
             let loadVCStart = CFAbsoluteTimeGetCurrent()
+            let componentName = component.name
+            let logger = log
             let vc = await withCheckedContinuation { continuation in
-                let lock = NSLock()
+                let continuationLock = NSLock()
                 var didResume = false
                 audioUnit.auAudioUnit.requestViewController { viewController in
-                    lock.lock()
-                    defer { lock.unlock() }
-                    guard !didResume else { return }
+                    continuationLock.lock()
+                    defer { continuationLock.unlock() }
+                    guard !didResume else {
+                        logger.warning("Ignoring duplicate requestViewController callback for \(componentName)")
+                        return
+                    }
                     didResume = true
                     continuation.resume(returning: viewController as? AUViewController)
                 }
