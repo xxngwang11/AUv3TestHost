@@ -67,7 +67,7 @@ struct EffectView: View {
                         .font(.headline)
                     Spacer()
                     Toggle("", isOn: $bypass)
-                        .onChange(of: bypass) { oldValue, newValue in
+                        .onChange(of: bypass) { newValue in
                             setBypass(newValue)
                         }
                 }
@@ -81,7 +81,7 @@ struct EffectView: View {
                             .font(.caption)
                             .foregroundColor(.secondary)
                         Slider(value: $gain, in: 0.0...2.0)
-                            .onChange(of: gain) { oldValue, newValue in
+                            .onChange(of: gain) { newValue in
                                 setGain(newValue)
                             }
                         Text("2.0")

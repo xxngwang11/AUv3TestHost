@@ -10,8 +10,8 @@ public class TestEffectAudioUnit: AUAudioUnit {
     // Audio format
     private var inputBus: AUAudioUnitBus
     private var outputBus: AUAudioUnitBus
-    private var inputBusArray: AUAudioUnitBusArray
-    private var outputBusArray: AUAudioUnitBusArray
+    private var inputBusArray: AUAudioUnitBusArray!
+    private var outputBusArray: AUAudioUnitBusArray!
     
     // Parameters
     private var gainParameter: AUParameter!
