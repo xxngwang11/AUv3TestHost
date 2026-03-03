@@ -52,9 +52,8 @@ struct PluginDetailView: View {
                     .foregroundColor(.secondary)
                 
                 Text("Version: \(plugin.versionString)")
- 	                    .font(.caption)
- 	                    .foregroundColor(.secondary)
-                }
+  	                    .font(.caption)
+  	                    .foregroundColor(.secondary)
             }
             
             Spacer()
