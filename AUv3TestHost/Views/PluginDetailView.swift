@@ -19,16 +19,16 @@ struct PluginDetailView: View {
     
     private var noPluginUIDescription: String {
         if engine.currentAudioUnit == nil {
-            return "Load a plugin to see its interface."
+            return "加载插件以查看其界面。"
         }
         if isAppleSystemPlugin {
-            return "This plugin did not provide a custom UI to the host. Some Apple built-in effects, such as AUBandpassFilter and AUDelay, are parameter-only."
+            return "此插件未向宿主提供自定义界面。部分 Apple 内置效果器（如 AUBandpassFilter 和 AUDelay）仅支持参数控制。"
         }
-        return "This plugin did not provide a custom UI to the host. Some plugins are parameter-only."
+        return "此插件未向宿主提供自定义界面。部分插件仅支持参数控制。"
     }
     
     private var metricsOverheadExplanation: String {
-        "Stage sum may not equal total load time. Total also includes setup operations and async callback overhead."
+        "各阶段耗时之和可能不等于总加载时间，总时间还包括初始化操作和异步回调开销。"
     }
     
     private func stageSum(for metrics: PluginLoadMetrics) -> Double {
@@ -80,12 +80,12 @@ struct PluginDetailView: View {
                     .foregroundColor(.secondary)
                 
                 if isAppleSystemPlugin {
-                    Text("System built-in plugin (Apple)")
+                    Text("系统内置插件 (Apple)")
                         .font(.caption2)
                         .foregroundColor(.secondary)
                 }
                 
-                Text("Version: \(plugin.versionString)")
+                Text("版本: \(plugin.versionString)")
   	                    .font(.caption)
   	                    .foregroundColor(.secondary)
             }
@@ -102,7 +102,7 @@ struct PluginDetailView: View {
                     ProgressView()
                         .scaleEffect(0.8)
                 } else {
-                    Label("Load", systemImage: "play.circle.fill")
+                    Label("加载", systemImage: "play.circle.fill")
                 }
             }
             .buttonStyle(.borderedProminent)
@@ -114,7 +114,7 @@ struct PluginDetailView: View {
                     await runBenchmark(times: 5)
                 }
             } label: {
-                Label("Benchmark x5", systemImage: "gauge.with.dots.needle.67percent")
+                Label("基准测试 x5", systemImage: "gauge.with.dots.needle.67percent")
             }
             .buttonStyle(.bordered)
             .disabled(isLoading)
@@ -127,12 +127,12 @@ struct PluginDetailView: View {
     private func metricsSection(_ metrics: PluginLoadMetrics) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text("Load Performance")
+                Text("加载性能")
                     .font(.headline)
                 
                 Spacer()
                 
-                Text(metrics.loadedOutOfProcess ? "Out-of-Process" : "In-Process")
+                Text(metrics.loadedOutOfProcess ? "进程外" : "进程内")
                     .font(.caption)
                     .padding(.horizontal, 8)
                     .padding(.vertical, 4)
@@ -145,7 +145,7 @@ struct PluginDetailView: View {
                 HStack {
                     Image(systemName: "exclamationmark.triangle.fill")
                         .foregroundColor(.orange)
-                    Text("Out-of-process failed, loaded in-process as fallback")
+                    Text("进程外加载失败，已回退为进程内加载")
                         .font(.caption)
                         .foregroundColor(.orange)
                 }
@@ -163,17 +163,17 @@ struct PluginDetailView: View {
             
             // 指标条形图
             VStack(spacing: 8) {
-                MetricBar(label: "Instantiate", value: metrics.instantiateTime, maxValue: metrics.totalTime, color: .blue)
-                MetricBar(label: "Connect Graph", value: metrics.connectAudioGraphTime, maxValue: metrics.totalTime, color: .green)
-                MetricBar(label: "Allocate Resources", value: metrics.allocateResourcesTime, maxValue: metrics.totalTime, color: .orange)
-                MetricBar(label: "Load ViewController", value: metrics.loadViewControllerTime, maxValue: metrics.totalTime, color: .purple)
+                MetricBar(label: "实例化", value: metrics.instantiateTime, maxValue: metrics.totalTime, color: .blue)
+                MetricBar(label: "连接音频图", value: metrics.connectAudioGraphTime, maxValue: metrics.totalTime, color: .green)
+                MetricBar(label: "分配资源", value: metrics.allocateResourcesTime, maxValue: metrics.totalTime, color: .orange)
+                MetricBar(label: "加载视图控制器", value: metrics.loadViewControllerTime, maxValue: metrics.totalTime, color: .purple)
             }
             
             Divider()
             
             // 总时间
             HStack {
-                Text("Total Load Time")
+                Text("总加载时间")
                     .font(.headline)
                 Spacer()
                 Text(String(format: "%.2f ms", metrics.totalTime))
@@ -185,7 +185,7 @@ struct PluginDetailView: View {
             Text(metricsOverheadExplanation)
                 .font(.caption)
                 .foregroundColor(.secondary)
-            Text("Stage sum: \(String(format: "%.2f", stageSum(for: metrics))) ms, other overhead: \(String(format: "%.2f", otherOverhead(for: metrics))) ms")
+            Text("阶段耗时之和: \(String(format: "%.2f", stageSum(for: metrics))) ms，其他开销: \(String(format: "%.2f", otherOverhead(for: metrics))) ms")
                 .font(.caption)
                 .foregroundColor(.secondary)
         }
@@ -207,7 +207,7 @@ struct PluginDetailView: View {
                     .padding()
             } else {
                 ContentUnavailableView(
-                    "No Plugin UI",
+                    "无插件界面",
                     systemImage: "rectangle.dashed",
                     description: Text(noPluginUIDescription)
                 )
@@ -227,7 +227,7 @@ struct PluginDetailView: View {
                 HStack {
                     Image(systemName: "info.circle.fill")
                         .foregroundColor(.blue)
-                    Text("Playing test audio through the effect chain")
+                    Text("正在通过效果链播放测试音频")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
@@ -243,14 +243,14 @@ struct PluginDetailView: View {
                     }
                 } label: {
                     Image(systemName: engine.isPlaying ? "stop.fill" : "play.fill")
-                    Text(engine.isPlaying ? "Stop" : "Play Test Audio")
+                    Text(engine.isPlaying ? "停止" : "播放测试音频")
                 }
                 .buttonStyle(.bordered)
                 
                 Spacer()
                 
                 if loadCount > 0 {
-                    Text("Loaded \(loadCount) time(s)")
+                    Text("已加载 \(loadCount) 次")
                         .font(.caption)
                         .foregroundColor(.secondary)
                 }
