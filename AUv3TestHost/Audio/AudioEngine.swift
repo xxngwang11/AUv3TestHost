@@ -255,16 +255,29 @@ public class AudioEngine {
         // 2. Instantiate AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
-        let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
-        
         do {
-            let audioUnit = try await AVAudioUnit.instantiate(
-                with: component.audioComponentDescription,
-                options: options
-            )
+            let audioUnit: AVAudioUnit
+            var actualOutOfProcess = outOfProcess
+            
+            do {
+                let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
+                audioUnit = try await AVAudioUnit.instantiate(
+                    with: component.audioComponentDescription,
+                    options: options
+                )
+            } catch {
+                guard outOfProcess else { throw error }
+                log.warning("Out-of-process load failed for \(component.name): \(error.localizedDescription). Retrying in-process.")
+                actualOutOfProcess = false
+                audioUnit = try await AVAudioUnit.instantiate(
+                    with: component.audioComponentDescription,
+                    options: []
+                )
+            }
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            metrics.loadedOutOfProcess = actualOutOfProcess
             
             self.currentAudioUnit = audioUnit
             
