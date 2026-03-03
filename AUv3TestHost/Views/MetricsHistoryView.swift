@@ -28,6 +28,15 @@ struct MetricsHistoryView: View {
                             
                             Spacer()
                             
+                            if metrics.isColdStart {
+                                Text("冷启动")
+                                    .font(.caption2)
+                                    .padding(.horizontal, 6)
+                                    .padding(.vertical, 2)
+                                    .background(Color.orange.opacity(0.2))
+                                    .cornerRadius(4)
+                            }
+                            
                             Text(metrics.loadedOutOfProcess ? "进程外" : "进程内")
                                 .font(.caption2)
                                 .padding(.horizontal, 6)

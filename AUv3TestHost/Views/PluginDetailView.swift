@@ -131,6 +131,15 @@ struct PluginDetailView: View {
                 
                 Spacer()
                 
+                if metrics.isColdStart {
+                    Text("冷启动")
+                        .font(.caption)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.orange.opacity(0.2))
+                        .cornerRadius(4)
+                }
+                
                 Text(metrics.loadedOutOfProcess ? "进程外" : "进程内")
                     .font(.caption)
                     .padding(.horizontal, 8)
@@ -176,6 +185,17 @@ struct PluginDetailView: View {
             Text("阶段耗时之和: \(String(format: "%.2f", stageSum(for: metrics))) ms，其他开销: \(String(format: "%.2f", otherOverhead(for: metrics))) ms")
                 .font(.caption)
                 .foregroundColor(.secondary)
+            
+            if metrics.isColdStart {
+                HStack(alignment: .top, spacing: 4) {
+                    Image(systemName: "info.circle.fill")
+                        .foregroundColor(.orange)
+                        .font(.caption)
+                    Text("首次进程外加载（冷启动）需要启动 XPC 宿主进程，耗时约 1-2 秒属于正常现象。后续加载将复用已运行的进程，速度会显著提升。")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                }
+            }
         }
         .padding()
         .background(Color.secondary.opacity(0.1))

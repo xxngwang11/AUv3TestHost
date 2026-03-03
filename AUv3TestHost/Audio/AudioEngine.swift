@@ -29,6 +29,10 @@ public class AudioEngine {
     // Test audio file
     private var testFile: AVAudioFile?
     
+    // Track plugins that have been loaded OOP to detect cold starts.
+    // Key = componentType|componentSubType|componentManufacturer
+    private var warmPluginKeys: Set<String> = []
+    
     public init() {
         setupEngine()
         #if os(iOS)
@@ -245,6 +249,13 @@ public class AudioEngine {
             loadedOutOfProcess: outOfProcess
         )
         
+        // Detect cold start: first OOP load of this specific plugin type
+        let desc = component.audioComponentDescription
+        let pluginKey = "\(desc.componentType)|\(desc.componentSubType)|\(desc.componentManufacturer)"
+        if outOfProcess && !warmPluginKeys.contains(pluginKey) {
+            metrics.isColdStart = true
+        }
+        
         let totalStart = CFAbsoluteTimeGetCurrent()
         
         // 1. Unload current plugin
@@ -273,6 +284,9 @@ public class AudioEngine {
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
             
             self.currentAudioUnit = audioUnit
+            
+            // Mark this plugin as warm for future cold-start detection
+            warmPluginKeys.insert(pluginKey)
             
             // 3. Connect audio graph
             let connectStart = CFAbsoluteTimeGetCurrent()

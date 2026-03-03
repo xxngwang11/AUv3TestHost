@@ -18,6 +18,9 @@ public struct PluginLoadMetrics: Identifiable {
     // 加载选项
     public var loadedOutOfProcess: Bool = true
     
+    // 冷启动标记：首次加载 OOP 插件时需要启动 XPC 进程，耗时显著高于后续加载
+    public var isColdStart: Bool = false
+    
     // 错误信息
     public var errorMessage: String?
     
@@ -59,7 +62,7 @@ public class MetricsManager: ObservableObject {
         ║  Load ViewController:  \(String(format: "%8.2f", metrics.loadViewControllerTime)) ms
         ╠═══════════════════════════════════════════════════════════╣
         ║  🚀 Total:             \(String(format: "%8.2f", metrics.totalTime)) ms
-        ║  Mode: \(metrics.loadedOutOfProcess ? "Out-of-Process" : "In-Process")
+        ║  Mode: \(metrics.loadedOutOfProcess ? "Out-of-Process" : "In-Process")\(metrics.isColdStart ? " (Cold Start)" : "")
         ╚═══════════════════════════════════════════════════════════╝
         
         """)
