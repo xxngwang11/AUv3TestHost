@@ -51,6 +51,12 @@ struct PluginDetailView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                 
+                if plugin.manufacturerName.localizedCaseInsensitiveContains("apple") {
+                    Text("System built-in plugin (Apple)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
+                
                 Text("Version: \(plugin.versionString)")
   	                    .font(.caption)
   	                    .foregroundColor(.secondary)
@@ -126,6 +132,12 @@ struct PluginDetailView: View {
                     .bold()
                     .foregroundColor(metrics.totalTime < 200 ? .green : (metrics.totalTime < 500 ? .orange : .red))
             }
+            
+            let stageSum = metrics.instantiateTime + metrics.connectAudioGraphTime + metrics.allocateResourcesTime + metrics.loadViewControllerTime
+            let otherOverhead = max(0, metrics.totalTime - stageSum)
+            Text("Stage sum is not expected to equal total. Total also includes unload/preparation and async callback overhead. Stage sum: \(String(format: "%.2f", stageSum)) ms, other overhead: \(String(format: "%.2f", otherOverhead)) ms.")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
@@ -147,7 +159,11 @@ struct PluginDetailView: View {
                 ContentUnavailableView(
                     "No Plugin UI",
                     systemImage: "rectangle.dashed",
-                    description: Text("Load a plugin to see its interface")
+                    description: Text(
+                        engine.currentAudioUnit == nil
+                        ? "Load a plugin to see its interface."
+                        : "This plugin did not provide a custom UI to the host. Many built-in Apple effects (for example AUBandpassFilter, AUDelay) are parameter-only and can appear as \"No Plugin UI\"."
+                    )
                 )
                 .frame(height: 200)
             }
