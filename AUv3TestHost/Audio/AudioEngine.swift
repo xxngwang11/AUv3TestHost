@@ -255,16 +255,17 @@ public class AudioEngine {
         // 2. Instantiate AudioUnit
         let instantiateStart = CFAbsoluteTimeGetCurrent()
         
-        let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
-        
         do {
-            let audioUnit = try await AVAudioUnit.instantiate(
+            let audioUnit: AVAudioUnit
+            let options: AudioComponentInstantiationOptions = outOfProcess ? .loadOutOfProcess : []
+            audioUnit = try await AVAudioUnit.instantiate(
                 with: component.audioComponentDescription,
                 options: options
             )
             
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            metrics.loadedOutOfProcess = outOfProcess
             
             self.currentAudioUnit = audioUnit
             
@@ -303,6 +304,9 @@ public class AudioEngine {
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
         } catch let error as NSError {
+            let instantiateEnd = CFAbsoluteTimeGetCurrent()
+            metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
+            
             #if os(iOS)
             // iOS-specific error handling
             if error.domain == NSOSStatusErrorDomain {
@@ -313,7 +317,7 @@ public class AudioEngine {
                     log.error("Format not supported - check audio format compatibility")
                 }
             } else {
-                log.error("Failed to load plugin: \(error.localizedDescription)")
+                log.error("Failed to load plugin (domain: \(error.domain), code: \(error.code)): \(error.localizedDescription)")
             }
             #else
             log.error("Failed to load plugin: \(error.localizedDescription)")
