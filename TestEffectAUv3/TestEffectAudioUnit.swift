@@ -10,8 +10,8 @@ public class TestEffectAudioUnit: AUAudioUnit {
     // Audio format
     private var inputBus: AUAudioUnitBus
     private var outputBus: AUAudioUnitBus
-    private var inputBusArray: AUAudioUnitBusArray
-    private var outputBusArray: AUAudioUnitBusArray
+    private var inputBusArray: AUAudioUnitBusArray!
+    private var outputBusArray: AUAudioUnitBusArray!
     
     // Parameters
     private var gainParameter: AUParameter!
@@ -28,13 +28,16 @@ public class TestEffectAudioUnit: AUAudioUnit {
         let defaultFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 2)!
         
         // Create input/output busses
-        inputBus = try AUAudioUnitBus(format: defaultFormat)
-        outputBus = try AUAudioUnitBus(format: defaultFormat)
+        let inputBus = try AUAudioUnitBus(format: defaultFormat)
+        let outputBus = try AUAudioUnitBus(format: defaultFormat)
         
-        inputBusArray = AUAudioUnitBusArray(audioUnit: nil, busType: .input, busses: [inputBus])
-        outputBusArray = AUAudioUnitBusArray(audioUnit: nil, busType: .output, busses: [outputBus])
+        self.inputBus = inputBus
+        self.outputBus = outputBus
         
         try super.init(componentDescription: componentDescription, options: options)
+        
+        inputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .input, busses: [inputBus])
+        outputBusArray = AUAudioUnitBusArray(audioUnit: self, busType: .output, busses: [outputBus])
         
         // Setup parameters
         setupParameterTree()
