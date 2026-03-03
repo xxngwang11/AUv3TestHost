@@ -224,6 +224,12 @@ struct PluginDetailView: View {
                     .background(Color.black.opacity(0.05))
                     .cornerRadius(8)
                     .padding()
+            } else if let audioUnit = engine.currentAudioUnit,
+                      let parameterTree = audioUnit.auAudioUnit.parameterTree,
+                      !parameterTree.allParameters.isEmpty {
+                // 插件未提供自定义界面，使用通用参数控制
+                GenericParameterView(parameterTree: parameterTree)
+                    .padding()
             } else {
                 ContentUnavailableView(
                     "无插件界面",

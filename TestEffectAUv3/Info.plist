@@ -32,7 +32,7 @@
                     <key>description</key>
                     <string>Simple gain effect for testing AUv3 hosting</string>
                     <key>factoryFunction</key>
-                    <string>TestEffectAudioUnitFactory</string>
+                    <string>$(PRODUCT_MODULE_NAME).EffectViewController</string>
                     <key>manufacturer</key>
                     <string>Test</string>
                     <key>type</key>

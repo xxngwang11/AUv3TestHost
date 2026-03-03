@@ -333,6 +333,12 @@ public class AudioEngine {
             let loadVCEnd = CFAbsoluteTimeGetCurrent()
             metrics.loadViewControllerTime = (loadVCEnd - loadVCStart) * 1000
             
+            if vc != nil {
+                log.info("ViewController loaded for \(componentName)")
+            } else {
+                log.info("No ViewController provided by \(componentName) — will use generic parameter UI")
+            }
+            
         } catch let error as NSError {
             let instantiateEnd = CFAbsoluteTimeGetCurrent()
             metrics.instantiateTime = (instantiateEnd - instantiateStart) * 1000
