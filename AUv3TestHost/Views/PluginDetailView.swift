@@ -10,6 +10,34 @@ struct PluginDetailView: View {
     @State private var currentMetrics: PluginLoadMetrics?
     @State private var isLoading = false
     @State private var loadCount = 0
+    // FourCC "appl" (hex: 0x6170706C) used by Apple's built-in Audio Units.
+    private let appleManufacturerCode: OSType = 0x6170706C
+    
+    private var isAppleSystemPlugin: Bool {
+        plugin.audioComponentDescription.componentManufacturer == appleManufacturerCode
+    }
+    
+    private var noPluginUIDescription: String {
+        if engine.currentAudioUnit == nil {
+            return "Load a plugin to see its interface."
+        }
+        if isAppleSystemPlugin {
+            return "This plugin did not provide a custom UI to the host. Some Apple built-in effects, such as AUBandpassFilter and AUDelay, are parameter-only."
+        }
+        return "This plugin did not provide a custom UI to the host. Some plugins are parameter-only."
+    }
+    
+    private var metricsOverheadExplanation: String {
+        "Stage sum may not equal total load time. Total also includes setup operations and async callback overhead."
+    }
+    
+    private func stageSum(for metrics: PluginLoadMetrics) -> Double {
+        metrics.instantiateTime + metrics.connectAudioGraphTime + metrics.allocateResourcesTime + metrics.loadViewControllerTime
+    }
+    
+    private func otherOverhead(for metrics: PluginLoadMetrics) -> Double {
+        max(0, metrics.totalTime - stageSum(for: metrics))
+    }
     
     var body: some View {
         VStack(spacing: 0) {
@@ -50,6 +78,12 @@ struct PluginDetailView: View {
                 Text(plugin.manufacturerName)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
+                
+                if isAppleSystemPlugin {
+                    Text("System built-in plugin (Apple)")
+                        .font(.caption2)
+                        .foregroundColor(.secondary)
+                }
                 
                 Text("Version: \(plugin.versionString)")
   	                    .font(.caption)
@@ -126,6 +160,13 @@ struct PluginDetailView: View {
                     .bold()
                     .foregroundColor(metrics.totalTime < 200 ? .green : (metrics.totalTime < 500 ? .orange : .red))
             }
+            
+            Text(metricsOverheadExplanation)
+                .font(.caption)
+                .foregroundColor(.secondary)
+            Text("Stage sum: \(String(format: "%.2f", stageSum(for: metrics))) ms, other overhead: \(String(format: "%.2f", otherOverhead(for: metrics))) ms")
+                .font(.caption)
+                .foregroundColor(.secondary)
         }
         .padding()
         .background(Color.secondary.opacity(0.1))
@@ -147,7 +188,7 @@ struct PluginDetailView: View {
                 ContentUnavailableView(
                     "No Plugin UI",
                     systemImage: "rectangle.dashed",
-                    description: Text("Load a plugin to see its interface")
+                    description: Text(noPluginUIDescription)
                 )
                 .frame(height: 200)
             }
